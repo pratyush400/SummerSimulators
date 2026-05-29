@@ -7,14 +7,30 @@ from vpython import *
 from random import choice
 
 
-scene=canvas(width =1024, height=480, center=vector(0,0,0), background=color.white, resizable=False, userzoom=False, userspin=False)
-scene.lights=[]
+scene=canvas(
+    width =1024, #unsure why width was chosen to be 1024 -jc
+    height=480, #unsure why height was chosen to be 480 -jc
+    center=vector(0,0,0), #all vectors will originate from the center of the screen, more precisely moves the scene and camera to have their center at (0,0,0) -jc
+    background=color.white, #i think we should consider having a slightly off white so the screen isnt super bright -jc
+    resizable=False, #not a fan of this. I would like to make it resizeable, but that might be outside our scope -jc
+    userzoom=False, 
+    userspin=False
+    )
+scene.lights=[]#this creates a scene with only two light sources, see below -jc
 distant_light(direction=vector( 0.22, 0.44, 0.88), color=color.white)
 distant_light(direction=vector(-0.88, -0.22, -0.44), color=color.white)
-#Moved down 100 affects below
-my_bookImage = box(pos=vector(0,-100,0), length=scene.width, height=scene.height, texture="https://i.imgur.com/ipbI9jA.jpeg", shininess=0, visible = False, color=color.white)
+#Moved down 100 affects below #no idea what this comment is refering to -jc
+my_bookImage = box( #completely unused, Remove? -jc
+    pos=vector(0,-100,0), 
+    length=scene.width, 
+    height=scene.height, 
+    texture="https://i.imgur.com/ipbI9jA.jpeg", #the texture is a side by side atomic view of the pe, compton effect -jc
+    shininess=0, 
+    visible = False, 
+    color=color.white
+    )
 
-#Variables
+#Global variables
 atoms_loc = scene.width/2
 animation_speed=1000
 remember_speed = animation_speed
@@ -28,23 +44,32 @@ propagating = False
 running = False
 is_atomic = False #Set to true when you switch to mechanistic view (see switchView)
 has_run = False #Set to true after a full atomic/mechanistic run. Calls reset_atomic to reset visible stuff if don't change atomic mechanism. Check has_run.
-remember_has_run=has_run
+remember_has_run=has_run #stops opening message from being shown multiple times later in the code (see:Run()) -jc
+
+#Set up posistion for the two electrons in the photoeletric effect -jc
 PE_dropElectronLoc = vector((-104/1025)*scene.width,(10/513)*scene.height,0)
 PE_scatterElectronLoc = vector((-70/1025)*scene.width,(-31/513)*scene.height,0)
 
 # SETTING UP COMPTON ELECTRON RANDOMNESS
-# seeting comptom election positions
+# seeting comptom election starting positions
 bottom_left = vector((-63/1025)*scene.width,(-153/513)*scene.height,0)
 top_left = vector((-63/1470)*scene.width,(145/590)*scene.height,0)
 bottom_right = vector((40/1000)*scene.width,(-160/500)*scene.height,0)
 top_right = vector((45/1000)*scene.width,(140/590)*scene.height,0)
-
+#sets up the different images for the 4 different posistions -jc
 bl_url = "https://medicalimaging.watzekdi.net/images/Xray_images/Activity2-Interactions/electron_BL.png"
 tl_url = "https://medicalimaging.watzekdi.net/images/Xray_images/Activity2-Interactions/electron_TL.png"
 br_url = "https://medicalimaging.watzekdi.net/images/Xray_images/Activity2-Interactions/electron_BR.png"
 tr_url = "https://medicalimaging.watzekdi.net/images/Xray_images/Activity2-Interactions/electron_TR.png"
 
-COMPTON_ANIMATION = {1: [bottom_left, bl_url,-20, -0.2], 2: [top_left, tl_url, 40, 0.2], 3: [bottom_right, br_url,-20, -0.2], 4: [top_right, tr_url, 40, 0.2]}
+#sets upp calues associated with an array of data to pass [start posistion, atomic image, x end posistion, y end posistion]
+#note that the last 2 values are later passed to adjusted_end to define the actual end point
+COMPTON_ANIMATION = {
+    1: [bottom_left, bl_url,-20, -0.2], 
+    2: [top_left, tl_url, 40, 0.2], 
+    3: [bottom_right, br_url,-20, -0.2], 
+    4: [top_right, tr_url, 40, 0.2]
+    }
 
 animation_choice = choice(list(COMPTON_ANIMATION.keys()))
 compton_electronLoc, url, x_corr, electron_y = COMPTON_ANIMATION[animation_choice]
@@ -67,7 +92,8 @@ remember_m_index=0
 lbl_compton=label(pos=vector(0, scene.height/2 - 70,0), text="Compton Electron", font="helvetica", box=False, canvas=scene, color=vec(0, 0, 0), height=text_size, visible=False, opacity=0)
 
 
-lbl_start1=label(
+#this is the button at the upper middle portion of the screen that takes you to the "atomic" view -jc
+lbl_start1=label( 
     pos=vector(0, scene.height/2,0),
     text="Click for mechanistic view!",
     font="helvetica",
@@ -77,6 +103,7 @@ lbl_start1=label(
     visible=True,
     opacity=0
     )
+# this is the button that starts the animation -jc
 lbl_start2=label(
     pos=vector(0,
     scene.height/2,0),
@@ -89,6 +116,7 @@ lbl_start2=label(
     visible=False,
     opacity=0
     )
+#unsure what this is, keep looking for information -jc
 medium_box = box(
     pos=vector(atoms_loc/2,-2.5*text_size,0),
     height=scene.height/1.5, width=scene.width/10,
@@ -96,6 +124,7 @@ medium_box = box(
     opacity=0.25,
     visible=False
     )
+#unsure what this is, keep looking -jc
 medium_label = text(
     pos=medium_box.pos + vector(-20,(medium_box.height/2.3),-50),
     text='Sample',
@@ -107,8 +136,9 @@ medium_label = text(
     height=1.5*text_size,
     visible=False
     )
+
 #BAS Source is a curve and box is invisible
-my_CS_atomic= box(
+my_CS_atomic= box( #unsure what this is, keep looking -jc
     pos=vector(0,-2*text_size,0),
     height=scene.width/2,
     length=scene.width/2,
@@ -118,7 +148,8 @@ my_CS_atomic= box(
     opacity=1,
     visible=False
     )
-my_PE_atomic= box(
+#This is the box that holds the sprite for the atom in the photoelectric effect -jc
+my_PE_atomic= box( 
     pos=vector(0,-2*text_size,0),
     height=scene.width/2,
     length=scene.width/2,
@@ -128,6 +159,7 @@ my_PE_atomic= box(
     opacity=1,
     visible=False
     )
+#This is the atomic image for the compton effect animation -jc
 my_trans_atomic= box(
     pos=vector(0,-2*text_size,0),
     height=scene.width/2,
@@ -138,12 +170,13 @@ my_trans_atomic= box(
     opacity=1,
     visible=False
     )
-
+#This is just an arry for the three images, most likely to call in a later function, but it seems redundant, check if we can remove later -jc
 my_mech_atomic_list=[
     my_PE_atomic,
     my_CS_atomic,
     my_trans_atomic
     ]
+#this sets up the different vectors for the atomic view -jc
 probability_list=[
     vector(350,-50,0),
     vector(750,-50,0),
@@ -158,6 +191,8 @@ probability_box = curve(
     visible=True,
     origin=vector(0,-50,0)
     )
+#This is a strange list, all the values in the x axis are negitive. Intuitively i would assume that these posistions are off the scene -jc
+#current hypothisis is that this is the locations that the incoming x-rays interact with the electrons -jc
 xray_source_list=[
     3*vector(-atoms_loc-180,0,0),
     3*vector(-atoms_loc-190,0,0),
@@ -169,6 +204,7 @@ xray_source_list=[
     3*vector(-atoms_loc-180,5,0),
     3*vector(-atoms_loc-180,0,0)
     ]
+#
 xray_source_new=curve(
     pos=xray_source_list,
     radius=2,
@@ -541,18 +577,24 @@ scene.append_to_title(l)
 # Functions
 
 def event_type_print(type):
+
     global event_type, num_CS, num_trans, num_PE, N
-    event_type=type
-    if event_type==1:
-        my_PE_label.visible=True
-        num_PE=num_PE+1
-    if event_type==2:
-        my_CS_label.visible=True
-        num_CS=num_CS+1
-    if event_type==3:
-        my_TR_label.visible=True
-        num_trans=num_trans+1
-    N=num_PE+num_CS+num_trans
+
+    event_type = type
+
+    if event_type == 1: #start photoeletric effect-jc
+        my_PE_label.visible = True
+        num_PE = num_PE+1
+
+    if event_type == 2: #start compton scattering -jc
+        my_CS_label.visible = True
+        num_CS = num_CS+1
+
+    if event_type == 3: #Transmission -jc
+        my_TR_label.visible = True
+        num_trans = num_trans+1
+
+    N = num_PE + num_CS + num_trans
 
 
 def caption_print(text):
