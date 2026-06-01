@@ -754,7 +754,7 @@ def interaction(photon, in_vector):
                 event_type_print(3)
                 return in_vector
 
-            #roll for photoelectric effect -jc
+            #roll for compton effect -jc
             elif rand>=0.585:#probPE=0.65 .9*0.65=0.585
 
                 event_type_print(2)
@@ -768,7 +768,7 @@ def interaction(photon, in_vector):
                         )
                     )
 
-            #roll for adsorbtion -jc
+            #roll for PE effect -jc
             else:
 
                 event_type_print(1)
@@ -783,13 +783,13 @@ def interaction(photon, in_vector):
                 event_type_print(3)
                 return in_vector
 
-            #roll for pe effect -jc
+            #roll for compton effect -jc
             elif rand>=0.0315: #probPE=0.07
 
                 event_type_print(2)
                 return (hat(vector(sqrt(2)/2 + random()*(1-sqrt(2)/2), -sqrt(2)/2 + random()*(sqrt(2)), 0)))
 
-            #roll for adsorbtion -jc
+            #roll for PE effect -jc
             else:
 
                 event_type_print(1)
@@ -804,13 +804,13 @@ def interaction(photon, in_vector):
                 event_type_print(3)
                 return in_vector
 
-            #roll for pe effect -jc
+            #roll for compton effect -jc
             elif rand>=0.008: #0.39*0.02  probPE=0.02
 
                 event_type_print(2)
                 return (hat(vector(sqrt(2)/2 + random()*(1-sqrt(2)/2), -sqrt(2)/2 + random()*(sqrt(2)), 0)))
 
-            #roll for adsorbtion -jc
+            #roll for PE effect -jc
             else:
                 event_type_print(1)
                 photon.visible = False
