@@ -870,58 +870,89 @@ def randomize_compton_position(): #randomly selects a starting posistion for the
 
 
 def resetAtomic():
+
     global has_run, started, PE_scatteredElectron, PE_dropElectron, compton_electron
-    if button_box_list[2].color == color.green:
+
+    if button_box_list[2].color == color.green: #check if user has clicked the start button -jc
         randomize_compton_position()
+    
     PE_scatterElectron.pos = PE_scatterElectronLoc
     PE_dropElectron.pos = PE_dropElectronLoc
     compton_electron.pos = compton_electronLoc
     PE_scatterElectron.opacity = 1
     PE_dropElectron.opacity = 1
+
     if has_run:
+
         for i in range(0,3):
-            my_electrons_list[i].visible=False
+
+            my_electrons_list[i].visible=False #all electrons (that should exist) are rendered invisible -jc
+        
         for i in range(1,4):
-            if button_box_list[i].color==vector(0.7,0.7,0.7):
+
+            if button_box_list[i].color == vector(0.7,0.7,0.7):
                 my_mech_atomic_list[i-1].visible=False
+        
         for i in range(1,4):
+
             if button_box_list[i].color==color.green and i==1:
+
                     my_electrons_list[i-1].visible=True
                     my_electrons_list[i].visible=True
+
             elif button_box_list[i].color==color.green and i==2:
+
                 my_electrons_list[i].visible=True
                 my_electrons_list[i].opacity=1
-    has_run = False
-    started = False
+
+    has_run = False #reset the running status but doesnt reset everything because of remember_has_run -jc
+
+    started = False #stops the simulation
     #animation_speed=1000
 
 def switchView():
+
     global is_atomic, running, propagating, started, has_run, my_evt, num_PE, num_CS, num_trans, my_mech_lbl
 
-    loc_b=scene.mouse.pos
+    loc_b = scene.mouse.pos #stores mouse posistion in loc_b -jc
 
-    if abs(loc_b.x-lbl_start1.pos.x) <= 100 and abs(loc_b.y-lbl_start1.pos.y) <= text_size:
-        if not started_atomic:
-            is_atomic = not is_atomic
+    if abs(loc_b.x - lbl_start1.pos.x) <= 100 and abs(loc_b.y - lbl_start1.pos.y) <= text_size:#checks if the mouse is inside the button -jc
+        
+        if not started_atomic: #activates if started atomic is false-jc
+
+            is_atomic = not is_atomic #
             my_error2_lbl.visible = False
             button_box_list[0].color = vector(0.7,0.7,0.7)
+
             if started:
-                xray.visible = False
+                xray.visible = False #clicking the start/stop button while the program is running stops the program -jc
+
             if is_atomic:
+
                 for i in range(0,3):
                     my_target_lbl_list[i].visible = False
+
+                #disable the menu and sliders while hiding the non atomic images -jc
                 current_element.visible = False
                 bg_menu.disabled = True
                 E_slider.disabled = True
+
+                #prevent the user from clicking certain buttons -jc
                 control_panel.bind("mousedown", pe_but)
                 control_panel.bind("mousedown", cs_but)
                 control_panel.bind("mousedown", trans_but)
                 atomic_viewBox.visible = False
                 lbl_start1.visible = False
+
+                #use the atomic image -jc
                 my_mech_lbl.visible = True
+
+                #foce the program to halt until a simulation type is chosen (ie: photoelectric/compton effect) -jc
                 my_evt=control_panel.waitfor('mousedown') #wait until mouse event chooses mechanism. Specify canvas.
                 caption_print("Switched to mechanistic view\n")
                 control_panel.bind("mousedown", Run)
+
+                #change the viewable objects -jc
                 medium_box.visible = False
                 medium_label.visible = False
                 detector_box.visible = False
@@ -936,26 +967,42 @@ def switchView():
                 my_PEtot_lbl.visible = False
                 my_TRtot_lbl.visible = False
                 my_CStot_lbl.visible = False
-            else:
+            else: #switch back to the origanal view of the simulation -jc
                 caption_print("Switched to target view\n")
+
+                #re-enable the sliders and menu
                 E_slider.disabled = False
                 bg_menu.disabled = False
                 animation_speed = 1000
+
                 for i in range(0,3):
+
+                    #hide the atomic view elements -jc
                     my_mech_atomic_list[i].visible = False
                     my_mech_lbl_list[i].visible = False
+
                     if i==remember_m_index:
+
+                        #restore the target  view elemens -jc
                         my_targets_list[i].visible = True
+
                 my_mech_atomic_list[i-1].visible = False
+
                 for i in range(1,4):
+
                     button_box_list[i].color = vector(0.7,0.7,0.7)
+
                 num_PE = 0
                 num_CS = 0
                 num_trans = 0
+
+                #restore user control
                 control_panel.bind("mousedown", Run)
                 control_panel.unbind("mousedown", pe_but)
                 control_panel.unbind("mousedown", cs_but)
                 control_panel.unbind("mousedown", trans_but)
+
+                #alter the visible and invisible elements -jc
                 lbl_start2.visible = False
                 lbl_start1.visible = True
                 my_mech_lbl.visible = False
@@ -970,6 +1017,7 @@ def switchView():
                 my_TRtot_lbl.visible = True
                 lbl_compton.visible = False
                 my_CStot_lbl.visible = True
+
             sleep(1/(2*animation_speed))
             started = False
             running = False
@@ -979,7 +1027,7 @@ def switchView():
 
 scene.bind("mousedown", switchView)
 
-def adjust_E(s):
+def adjust_E(s): #mantains the energy valuse based on the slider and allows user adjustment -jc
     global E, num_CS, num_PE, num_trans
     E = s.value #E is slider value
     E_caption.text = "<font size=4> E = <font>"+ str(E) + "keV"
@@ -1004,8 +1052,9 @@ E_slider = slider(
 E_caption = wtext(text="<font size=4> E<font> =<font>"+ str(E) + "keV   ")
 #Create element menu
 
-# Menu from Lane
-def change_element(m):
+# Menu from Lane #what/who is lane?
+def change_element(m): #allows for the switching of the PNGs in target view
+
     global current_element, Z, current_lbl, num_CS, num_PE, num_trans, my_element_changed, remember_m_index
 
     my_element_changed = not my_element_changed
@@ -1021,26 +1070,34 @@ def change_element(m):
 
     current_lbl = element_names_list[m.index]
     Z = float(menu_text[m.index]) #Use this to calculate probabilities in interaction()
+    
+    #hide current element -jc
     current_element.visible=True
     current_lbl.visible=True
+
     num_PE=0
     num_CS=0
     num_trans=0
     N=0
+
+    #show new element -jc
     pe_tot_lbl.visible=False
     cs_tot_lbl.visible=False
     tr_tot_lbl.visible=False
     my_element_changed=True
-wtext(text="               <font size=4>Atomic Number (Z) = <font>")
+    
+wtext(text = "               <font size=4>Atomic Number (Z) = <font>")
 menu_text = ["7.4","13.8","82"]  #Center numbers better
 menu_elements = [ water, bone, lead ]
-bg_menu = menu(bind=change_element, choices = menu_text)
+bg_menu = menu(bind = change_element, choices = menu_text)
 
 
-def adjust_speed(s):
+def adjust_speed(s): #simple function to control speed
+
     global animation_speed #animation_speed is slider value
     animation_speed = s.value
     speed_caption.text="<font size=4> Speed<font> =<font>"+ str(animation_speed)
+
 wtext(text="                 ")
 speed_slider = slider(bind=adjust_speed, min=500, max=2000, step=100, value=animation_speed, length=200, width=10)
 speed_caption = wtext(text="<font size=4> Speed<font> =<font>"+ str(animation_speed))
