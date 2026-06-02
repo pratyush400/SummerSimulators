@@ -1104,109 +1104,200 @@ speed_caption = wtext(text="<font size=4> Speed<font> =<font>"+ str(animation_sp
 
 
 #-------------------------------New canvas with control panel ---------------------------------------------------------------------------------------------------------------------------------------------------
-control_panel=canvas(width =1024, height=100, center = vector(0,0,0), background=vec(0.622, 0.779, 0.847), userspin=False, userzoom=False, resizable=False)
-title_cp=label(pos=vector(0,(control_panel.height/2)-text_size,0), text='Control Panel', font='helvetica', height=control_panel.height*(20/100), box=False, visible=True, color=color.black, opacity=0)
+control_panel = canvas(
+    width =1024, 
+    height=100, 
+    center = vector(0,0,0), 
+    background=vec(0.622, 0.779, 0.847), 
+    userspin=False, 
+    userzoom=False, 
+    resizable=False
+    )
+title_cp = label(
+    pos=vector(0,(control_panel.height/2)-text_size,0), 
+    text='Control Panel', 
+    font='helvetica', 
+    height=control_panel.height*(20/100), 
+    box=False, 
+    visible=True, 
+    color=color.black, 
+    opacity=0)
 
 button_box_list = []
 button_icon_list = []
 button_text_list = []
 button_greenbox_list = []
 button_size = 50
+
+#Creates Buttons given a destination, name and associated image -jc
 def create_buttons(chosen_canvas, text_list, icon_list): #Positioning buttons uniformly from -512 +side_buffer to 512 -side_buffer
+    
     global side_buffer, step
     side_buffer = chosen_canvas.width/100
     step = (chosen_canvas.width-2*side_buffer)/(len(text_list)-1)
-    for i in range(len(text_list)):
-        button_box_list.append(box(pos=vector((-chosen_canvas.width/2)+side_buffer+(i*step), -text_size/2, 0), length=control_panel.width*(button_size/1024), height=control_panel.height*(button_size/100), width=1, color=vec(0.5,0.5,0.5), shininess=0, opacity=0.3))
-        button_icon_list.append(label(pos=button_box_list[i].pos, text=icon_list[i], height=button_box_list[i].height/1.7, color=color.black, box=False, opacity=0))
-        button_text_list.append(label(pos=button_box_list[i].pos-vector(0,button_box_list[i].height/2+text_size,0), text=text_list[i], height=text_size, color=color.black, box=False, opacity=0))
 
+    for i in range(len(text_list)):
+
+        button_box_list.append(
+            box(
+                pos=vector((-chosen_canvas.width/2)+side_buffer+(i*step), -text_size/2, 0),
+                length=control_panel.width*(button_size/1024), 
+                height=control_panel.height*(button_size/100), 
+                width=1, 
+                color=vec(0.5,0.5,0.5), 
+                shininess=0, 
+                opacity=0.3
+                )    
+            )
+        button_icon_list.append(
+            label(
+                pos=button_box_list[i].pos, 
+                text=icon_list[i], 
+                height=button_box_list[i].height/1.7, 
+                color=color.black, 
+                box=False, 
+                opacity=0
+                )
+            )
+        button_text_list.append(
+            label(
+                pos=button_box_list[i].pos-vector(0,button_box_list[i].height/2+text_size,0),
+                text=text_list[i], 
+                height=text_size, 
+                color=color.black, 
+                box=False, 
+                opacity=0
+                )
+            )
+
+#sets up images for the control pannel -jc
 create_buttons(control_panel, ['Play/Pause', 'PE', 'Compton', 'Transmitted'], ['⏯','⚛️','📈','📡'])
 
 loc_b=vector(0,0,0)
+
 def Run():
+    
     global started, propagating, running, started_atomic, my_element_changed, num_CS, num_PE, num_trans, N, my_error_lbl, my_mech_lbl, N
-    loc_b=control_panel.mouse.pos
-    if abs(loc_b.x-button_box_list[0].pos.x)<=button_box_list[0].length/2 and abs(loc_b.y-button_box_list[0].pos.y)<=button_box_list[0].height/2:
+    
+    #tracks the mouse's posistion in the control pannel -jc
+    loc_b = control_panel.mouse.pos
+
+    if abs(loc_b.x-button_box_list[0].pos.x) <= button_box_list[0].length/2 and abs(loc_b.y-button_box_list[0].pos.y)<=button_box_list[0].height/2:
         scene.autoscale=False
-        if N==100:
+
+        if N==100: #resets the x+ray count if it ever reaches 3 digits. -jc
             N=0
-        if my_mech_lbl.visible==True:
-            my_error_lbl.visible=True
-            my_mech_lbl.visible=False
+
+        #freeze the simulation in the event of an error -jc
+        if my_mech_lbl.visible == True:
+
+            my_error_lbl.visible = True
+            my_mech_lbl.visible = False
             return
-        running = not running
-        if my_element_changed==True:
+        
+        running = not running #sets running from false to true -jc
+
+        #set up trackers for different event types -jc
+        if my_element_changed == True:
             my_element_changed = not my_element_changed
-            num_PE=0
-            num_CS=0
-            num_trans=0
-            N=0
+            num_PE = 0
+            num_CS = 0
+            num_trans = 0
+            N = 0
+
+        #running should be true at this moment -jc
         if running:
+
             if not started and not remember_has_run:
+
                 caption_print("Emiting X-rays!\n") #Appears in legend below control panel
                 caption_print("PE, Compton, and Transmitted buttons active only in Mechanistic View!\n")
                 started=True
+            
+            #start animation and change UI to show that -jc
             propagating = True
             button_box_list[0].color = color.green
+
+            #If in target view show target view buttons -jc
             if not is_atomic:
                 pe_tot_lbl.visible=True
                 cs_tot_lbl.visible=True
                 tr_tot_lbl.visible=True
                 E_slider.disabled=True
                 bg_menu.disabled=True
+
+            #If in  mechanistic view show corrisponding buttons -jc
             if is_atomic:
                 pe_tot_lbl.visible=False
                 cs_tot_lbl.visible=False
                 tr_tot_lbl.visible=False
                 started_atomic = True
+
+                #Make sure that the canvas is set up properly if this isnt the first time mechinistic view has been set up -jc
                 if has_run:   #Check
                     resetAtomic()
+        
         elif not running: #just elif?
+            
+            #stop the animation if the program is shut off
             propagating=False
             button_box_list[0].color = vector(0.7,0.7,0.7)
+
             if not is_atomic:
+
+                #make sure menu is off while animation incomplete
                 E_slider.disabled=False
                 bg_menu.disabled=False
+
             else:
+
+                #make sure menu is off while animation incomplete
                 E_slider.disabled=True
                 bg_menu.disabled=True
+
 control_panel.bind("mousedown", Run)
 #------------------------------
 #Create level buttons
 def pe_but():
+
     global PE_scatterElectron, PE_dropElectron, compton_electron
     loc_b=control_panel.mouse.pos
+
     if abs(loc_b.x-button_box_list[1].pos.x)<=button_box_list[0].length/2 and abs(loc_b.y-button_box_list[1].pos.y)<=button_box_list[0].height/2:
+
+        #make electrons for PE effect sim visable and opaque -jc
         my_electrons_list[0].visible=True
+        my_electrons_list[1].visible=True
         my_electrons_list[0].opacity=1
         my_electrons_list[1].opacity=1
-        my_electrons_list[1].visible=True
-        PE_scatterElectron.visible=True
-        PE_scatterElectron.pos=PE_scatterElectronLoc
-        PE_dropElectron.pos=PE_dropElectronLoc
-        PE_scatterElectron.opacity=1
-        PE_dropElectron.opacity=1
-        PE_dropElectron.visible=True
-        my_error_lbl.visible=False
-        compton_electron.visible=False
-        my_PE_atomic.visible=True
-        my_CS_atomic.visible=False
+        
+        #set default PE visibility for all elements -jc
+
+        PE_scatterElectron.visible = True
+        PE_scatterElectron.pos = PE_scatterElectronLoc
+        PE_dropElectron.pos = PE_dropElectronLoc
+        PE_scatterElectron.opacity = 1
+        PE_dropElectron.opacity = 1
+        PE_dropElectron.visible = True
+        my_error_lbl.visible = False
+        compton_electron.visible = False
+        my_PE_atomic.visible = True
+        my_CS_atomic.visible = False
         lbl_compton.visible = False
-        my_trans_atomic.visible=False
-        pe_tot_lbl.visible=False
-        cs_tot_lbl.visible=False
-        tr_tot_lbl.visible=False
-        probability_box.visible=False
-        my_bone_lbl.visible=False
-        my_water_lbl.visible=False
-        my_lead_lbl.visible=False
-        my_prob_lbl.visible=False
-        my_CStot_lbl.visible=False
-        my_PEtot_lbl.visible=False
-        my_TRtot_lbl.visible=False
-        bg_menu.disabled=True
-        my_mech_lbl.visible=False
+        my_trans_atomic.visible = False
+        pe_tot_lbl.visible = False
+        cs_tot_lbl.visible = False
+        tr_tot_lbl.visible = False
+        probability_box.visible = False
+        my_bone_lbl.visible = False
+        my_water_lbl.visible = False
+        my_lead_lbl.visible = False
+        my_prob_lbl.visible = False
+        my_CStot_lbl.visible = False
+        my_PEtot_lbl.visible = False
+        my_TRtot_lbl.visible = False
+        bg_menu.disabled = True
+        my_mech_lbl.visible = False
         button_box_list[1].color = color.green
         button_box_list[2].color = vector(0.7,0.7,0.7)
         button_box_list[3].color = vector(0.7,0.7,0.7)
@@ -1215,9 +1306,13 @@ control_panel.unbind("mousedown", pe_but)
 
 
 def cs_but():
+
     global PE_scatterElectron, PE_dropElectron, compton_electron
-    loc_b=control_panel.mouse.pos
+    loc_b = control_panel.mouse.pos
+
     if abs(loc_b.x-button_box_list[2].pos.x)<=button_box_list[0].length/2 and abs(loc_b.y-button_box_list[2].pos.y)<=button_box_list[0].height/2:
+        
+        #select one of the 4 random posistions -jc
         randomize_compton_position()
         compton_electron.visible=True
         compton_electron.opacity=1
@@ -1225,6 +1320,8 @@ def cs_but():
         my_electrons_list[2].visible=True
         my_electrons_list[2].opacity=1
         has_run=True
+
+        #set default compton visibility for all elements -jc
         PE_scatterElectron.visible=False
         PE_dropElectron.visible=False
         my_CS_atomic.visible=True
@@ -1243,8 +1340,12 @@ def cs_but():
         my_CStot_lbl.visible=False
         my_PEtot_lbl.visible=False
         my_TRtot_lbl.visible=False
+
+        #disable irrelevent menus -jc
         bg_menu.disabled=True
         my_mech_lbl.visible=False
+
+        #change buttons to accurately represent current state -jc
         button_box_list[1].color = vector(0.7,0.7,0.7)
         button_box_list[2].color = color.green
         button_box_list[3].color = vector(0.7,0.7,0.7)
@@ -1253,8 +1354,12 @@ def cs_but():
 control_panel.unbind("mousedown", cs_but)
 
 def trans_but(): #Make lead
+
     loc_b=control_panel.mouse.pos
+
     if abs(loc_b.x-button_box_list[3].pos.x)<=button_box_list[0].length/2 and abs(loc_b.y-button_box_list[3].pos.y)<=button_box_list[0].height/2:
+        
+        #set up visual status for transmission example -jc
         my_trans_atomic.visible=True
         my_CS_atomic.visible=False
         lbl_compton.visible = False
@@ -1272,72 +1377,133 @@ def trans_but(): #Make lead
         my_CStot_lbl.visible=False
         my_PEtot_lbl.visible=False
         my_TRtot_lbl.visible=False
+
+        #disable irrelevent menus -jc
         bg_menu.disabled=True
         my_mech_lbl.visible=False
+
+        #change buttons to accurately represent current state -jc
         button_box_list[1].color = vector(0.7,0.7,0.7)
         button_box_list[2].color = vector(0.7,0.7,0.7)
         button_box_list[3].color = color.green
+
         for i in range(0,3):
+
             my_electrons_list[i].visible=False
 #control_panel.bind("mousedown", trans_but)
 control_panel.unbind("mousedown", trans_but)
 
 #Running
 while True:
+
     rate(animation_speed)
+
     if propagating and not is_atomic and N<=99:
+
+        #create the photon -jc
         xray = create_photon(xray_source.pos+vector(xray_source.length/2,0,0))
+
+        #select the photon trajectory -jc
         initial_traj=hat(vector(cos(theta) + random()*(1-cos(theta)), -sin(theta) + random()*(2*sin(theta)), 0))
+
+        #start moving the photon -jc
         move_objects([xray], [initial_traj], [vector(0,0,0)], 3) #changed from medium_box.pos
+
+        #Modify (or keep) the electrion's behavior after the event occurs -jc
         move_objects([xray], [interaction(xray, initial_traj)], [detector_box.pos-vector(detector_box.length/2,0,0)], 3) #interaction calls event_type
+        
+        #Hide the old photon -jc
         xray.visible = False
         my_PE_label.visible=False
         my_CS_label.visible=False
         my_TR_label.visible=False
+
+        #update the different event counters -jc
         pe_tot_lbl.text = "{:.0f}".format(num_PE)
         cs_tot_lbl.text = "{:.0f}".format(num_CS)
         tr_tot_lbl.text = "{:.0f}".format(num_trans)
+
+    #this elif allows the program to function if we want the first simulations the be in atomic view -jc
     elif propagating and is_atomic and not has_run:
+
+        #set defaults for atomic view
         started_atomic = True
         animation_speed=300
+
         xray = create_photon(xray_source.pos+vector(xray_source.length/2,0,0))
+
         if button_box_list[1].color == color.green: #PE is on
+
+            #move the photon to the interaction site -jc
             move_objects([xray], [vector(1,0,0)], [PE_scatterElectron.pos+vector(50,0,0)], 2) #added extra 50 to ending position along to get closer to scattered
+            
+            #hide old photon -jc
             xray.visible = False
+
+            #animate photon leaving the atom -jc
             move_objects([PE_scatterElectron], [vector(1,-0.3,0)], [vector(scene.width*(1000/1024),0,0)], 2)
+
+            #create photon emmited by the high orbital electron as it falls -jc
             xray=create_photon(vector(-10,20,0)) #This origin puts pulse in right place
+
+            #animate the high orbital electron moving to the inner orbital -jc
             move_objects([xray, PE_dropElectron], [vector(1,0.2,0), PE_scatterElectron.pos-PE_dropElectron.pos-vector(0,750,0)], [vector(scene.width*(300/1024),0,0), PE_scatterElectronLoc], 2) #Secondary X-ray doesn't go far
+            
+            #hide used objects -jc
             xray.visible = False
             my_secondary_abs_lbl.visible=True
             my_secondary_abs_lbl2.visible=True
+
         sleep(0.1)
+
         if button_box_list[2].color == color.green:
+
+            #create a new start posistion if the PE simulation is still selected -jc
             xray_start = xray_source.pos + vector(xray_source.length/2, 0, 0)
             direction_to_electron = hat(compton_electron.pos - xray_start)
 
             if direction_to_electron.y < 0:
                 direction_to_electron.y += 0.1
 
+            #set up new velocity and final stopping point -jc
             scattered_direction = vector(direction_to_electron.x, -direction_to_electron.y, 0)
             adjusted_end = compton_electron.pos + vector(61.25 + x_corr, 0, 0)
 
+            #move until the photon is at the calculated ending x-value -jc
             move_objects([xray], [direction_to_electron], [adjusted_end], 2)
             move_objects([xray, compton_electron], [scattered_direction, vector(1, electron_y, 0)],
                          [vector(scene.width*(1000/1024),0,0), vector(scene.width*(1000/1024),0,0)], 2)
 
 
-        if button_box_list[3].color == color.green: #Trans is on
+        #transmission sim
+        if button_box_list[3].color == color.green: #Trans is on -jc
+
+            #select a random number -jc
             rand2=random()
+
+            #50/50 of photon going up/down -jc
             if rand2>=0.5:
+
                 rand2=0.25*rand2
+
             else:
+
                 rand2=-0.25*rand2
+            
+            #move photon to scene end in the randomised direction
             move_objects([xray], [vector(1,rand2,0)], [vector(scene.width*(1000/1024),0,0)], 2)
+
+        #make photon invisible after motion stops -jc
         xray.visible = False
+
+        #during the photoelectric effect this is responsable for creating the explosion sticker and "adsorbed quickly" -jc
         if my_secondary_abs_lbl.visible==True:
+
             sleep(2)
             my_secondary_abs_lbl.visible=False
             my_secondary_abs_lbl2.visible=False
+        
+        #stop the simulation and reset current state -jc
         button_box_list[0].color = vector(0.7,0.7,0.7)
         control_panel.bind("mousedown", pe_but)
         control_panel.bind("mousedown", cs_but)
