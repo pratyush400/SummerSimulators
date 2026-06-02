@@ -6,16 +6,32 @@ from vpython import *
 from random import choice
 
 
-scene=canvas(width =1024, height=480, center=vector(0,0,0), background=color.white, resizable=False, userzoom=False, userspin=False)
-scene.lights=[]
-distant_light(direction=vector( 0.22, 0.44, 0.88), color=color.white)
-distant_light(direction=vector(-0.88, -0.22, -0.44), color=color.white)
-#Moved down 100 affects below
-my_bookImage = box(pos=vector(0,-100,0), length=scene.width, height=scene.height, texture="https://i.imgur.com/ipbI9jA.jpeg", shininess=0, visible = False, color=color.white)
+scene=canvas(
+    width = 1024, #unsure why width was chosen to be 1024 -jc
+    height = 480, #unsure why height was chosen to be 480 -jc
+    center = vector(0,0,0), #all vectors will originate from the center of the screen, more precisely moves the scene and camera to have their center at (0,0,0) -jc
+    background = color.white, #i think we should consider having a slightly off white so the screen isnt super bright -jc
+    resizable = False, #not a fan of this. I would like to make it resizeable, but that might be outside our scope -jc
+    userzoom = False, 
+    userspin = False
+    )
+scene.lights = []#this creates a scene with only two light sources, see below -jc
+distant_light(direction = vector( 0.22, 0.44, 0.88), color = color.white)
+distant_light(direction = vector(-0.88, -0.22, -0.44), color = color.white)
+#Moved down 100 affects below #no idea what this comment is refering to -jc
+my_bookImage = box( #completely unused, Remove? -jc
+    pos = vector(0,-100,0), 
+    length = scene.width, 
+    height = scene.height, 
+    texture = "https://i.imgur.com/ipbI9jA.jpeg", #the texture is a side by side atomic view of the pe, compton effect -jc
+    shininess = 0, 
+    visible = False, 
+    color = color.white
+    )
 
-#Variables
+#Global variables
 atoms_loc = scene.width/2
-animation_speed=1000
+animation_speed = 1000
 remember_speed = animation_speed
 E = 20 #Energy in keV
 Z = 7.4 #Starting atomic number
@@ -27,38 +43,50 @@ propagating = False
 running = False
 is_atomic = False #Set to true when you switch to mechanistic view (see switchView)
 has_run = False #Set to true after a full atomic/mechanistic run. Calls reset_atomic to reset visible stuff if don't change atomic mechanism. Check has_run.
-remember_has_run=has_run
+remember_has_run = has_run #stops opening message from being shown multiple times later in the code (see:Run()) -jc
+
+#Set up posistion for the two electrons in the photoeletric effect -jc
 PE_dropElectronLoc = vector((-104/1025)*scene.width,(10/513)*scene.height,0)
 PE_scatterElectronLoc = vector((-70/1025)*scene.width,(-31/513)*scene.height,0)
 
-# SETTING UP COMPTON ELECTRON RANDOMNESS 
-# seeting comptom election positions
+# SETTING UP COMPTON ELECTRON RANDOMNESS
+# seeting comptom election starting positions
 bottom_left = vector((-63/1025)*scene.width,(-153/513)*scene.height,0)
 top_left = vector((-63/1470)*scene.width,(145/590)*scene.height,0)
 bottom_right = vector((40/1000)*scene.width,(-160/500)*scene.height,0)
 top_right = vector((45/1000)*scene.width,(140/590)*scene.height,0)
 
+#sets up the different images for the 4 different posistions -jc
 bl_url = "https://medicalimaging.watzekdi.net/images/Xray_images/Activity2-Interactions/electron_BL.png"
 tl_url = "https://medicalimaging.watzekdi.net/images/Xray_images/Activity2-Interactions/electron_TL.png"
 br_url = "https://medicalimaging.watzekdi.net/images/Xray_images/Activity2-Interactions/electron_BR.png"
 tr_url = "https://medicalimaging.watzekdi.net/images/Xray_images/Activity2-Interactions/electron_TR.png"
 
-COMPTON_ANIMATION = {1: [bottom_left, bl_url,-20, -0.2], 2: [top_left, tl_url, 40, 0.2], 3: [bottom_right, br_url,-20, -0.2], 4: [top_right, tr_url, 40, 0.2]}
+#sets upp calues associated with an array of data to pass [start posistion, atomic image, x end posistion, y end posistion]
+#note that the last 2 values are later passed to adjusted_end to define the actual end point
+COMPTON_ANIMATION = {
+    1: [bottom_left, bl_url,-20, -0.2], 
+    2: [top_left, tl_url, 40, 0.2], 
+    3: [bottom_right, br_url,-20, -0.2], 
+    4: [top_right, tr_url, 40, 0.2]
+    }
 
 animation_choice = choice(list(COMPTON_ANIMATION.keys()))
 compton_electronLoc, url, x_corr, electron_y = COMPTON_ANIMATION[animation_choice]
 
 
+#This is an absurdly long list of differnet pulse values
+#Unsure of what pulse list is used for, investigate more
+pulse_list = [vector(0,34.625,0),vector(0.125,34.625,0),vector(0.25,34.5,0),vector(0.375,34.375,0),vector(0.5,34.25,0),vector(0.625,34.125,0),vector(0.75,34,0),vector(0.875,33.75,0),vector(1,33.625,0),vector(1.125,33.25,0),vector(1.25,33.125,0),vector(1.375,32.875,0),vector(1.5,32.75,0),vector(1.625,32.625,0),vector(1.75,32.5,0),vector(1.875,32.375,0),vector(2,32.375,0),vector(2.125,32.25,0),vector(2.25,32.375,0),vector(2.375,32.375,0),vector(2.5,32.5,0),vector(2.625,32.625,0),vector(2.75,32.75,0),vector(2.875,32.875,0),vector(3,33,0),vector(3.125,33.25,0),vector(3.25,33.625,0),vector(3.375,34,0),vector(3.5,34.375,0),vector(3.625,35,0),vector(3.75,35.5,0),vector(3.875,35.875,0),vector(4,36.375,0),vector(4.125,36.875,0),vector(4.25,37.125,0),vector(4.375,37.5,0),vector(4.5,37.875,0),vector(4.625,38.25,0),vector(4.75,38.5,0),vector(4.875,38.75,0),vector(5,38.875,0),vector(5.125,39,0),vector(5.25,39.125,0),vector(5.375,39.25,0),vector(5.5,39.375,0),vector(5.625,39.375,0),vector(5.75,39.5,0),vector(5.875,39.5,0),vector(6,39.5,0),vector(6.125,39.5,0),vector(6.25,39.375,0),vector(6.375,39.375,0),vector(6.5,39.25,0),vector(6.625,39.125,0),vector(6.75,39,0),vector(6.875,38.875,0),vector(7,38.75,0),vector(7.125,38.5,0),vector(7.25,38.125,0),vector(7.375,37.875,0),vector(7.5,37.625,0),vector(7.625,37.125,0),vector(7.75,36.625,0),vector(7.875,36.125,0),vector(8,35.625,0),vector(8.125,34.75,0),vector(8.25,34,0),vector(8.375,32.875,0),vector(8.5,31.75,0),vector(8.625,30.5,0),vector(8.75,29.25,0),vector(8.875,28.25,0),vector(9,27.375,0),vector(9.125,26.25,0),vector(9.25,25.375,0),vector(9.375,24.625,0),vector(9.5,23.875,0),vector(9.625,23.25,0),vector(9.75,22.625,0),vector(9.875,22.25,0),vector(10,21.875,0),vector(10.125,21.5,0),vector(10.25,21.375,0),vector(10.375,21.25,0),vector(10.5,21.25,0),vector(10.625,21.25,0),vector(10.75,21.25,0),vector(10.875,21.375,0),vector(11,21.625,0),vector(11.125,21.875,0),vector(11.25,22.5,0),vector(11.375,22.875,0),vector(11.5,23.375,0),vector(11.625,24.125,0),vector(11.75,24.875,0),vector(11.875,25.75,0),vector(12,26.5,0),vector(12.125,27.625,0),vector(12.25,28.75,0),vector(12.375,29.75,0),vector(12.5,30.75,0),vector(12.625,32.25,0),vector(12.75,33.75,0),vector(12.875,35,0),vector(13,36.25,0),vector(13.125,37.75,0),vector(13.25,39,0),vector(13.375,40,0),vector(13.5,41,0),vector(13.625,42.25,0),vector(13.75,43.25,0),vector(13.875,44,0),vector(14,44.75,0),vector(14.125,45.625,0),vector(14.25,46.25,0),vector(14.375,46.75,0),vector(14.5,47.125,0),vector(14.625,47.625,0),vector(14.75,47.875,0),vector(14.875,48,0),vector(15,48.125,0),vector(15.125,48.25,0),vector(15.25,48.125,0),vector(15.375,48,0),vector(15.5,47.875,0),vector(15.625,47.75,0),vector(15.75,47.375,0),vector(15.875,47,0),vector(16,46.625,0),vector(16.125,45.875,0),vector(16.25,45.25,0),vector(16.375,44.5,0),vector(16.5,43.75,0),vector(16.625,42.75,0),vector(16.75,41.75,0),vector(16.875,40.75,0),vector(17,39.625,0),vector(17.125,38,0),vector(17.25,35.875,0),vector(17.375,34.375,0),vector(17.5,32.625,0),vector(17.625,29.5,0),vector(17.75,26.625,0),vector(17.875,24.25,0),vector(18,21.75,0),vector(18.125,18.5,0),vector(18.25,15.875,0),vector(18.375,14,0),vector(18.5,12,0),vector(18.625,9.75,0),vector(18.75,8,0),vector(18.875,6.625,0),vector(19,5.375,0),vector(19.125,4,0),vector(19.25,2.875,0),vector(19.375,2.5,0),vector(19.5,2,0),vector(19.625,1.375,0),vector(19.75,1.25,0),vector(19.875,1.25,0),vector(20,1.625,0),vector(20.125,2.125,0),vector(20.25,2.75,0),vector(20.375,3.5,0),vector(20.5,4.375,0),vector(20.625,5.75,0),vector(20.75,7.375,0),vector(20.875,8.875,0),vector(21,10.375,0),vector(21.125,12.625,0),vector(21.25,15,0),vector(21.375,17.125,0),vector(21.5,19.5,0),vector(21.625,22.625,0),vector(21.75,25.875,0),vector(21.875,28.75,0),vector(22,32.125,0),vector(22.125,36.5,0),vector(22.25,40.5,0),vector(22.375,44.125,0),vector(22.5,48,0),vector(22.625,52.25,0),vector(22.75,56,0),vector(22.875,58.875,0),vector(23,61.75,0),vector(23.125,64.875,0),vector(23.25,67.5,0),vector(23.375,69.375,0),vector(23.5,71.375,0),vector(23.625,73.375,0),vector(23.75,75,0),vector(23.875,76.125,0),vector(24,76.875,0),vector(24.125,77.75,0),vector(24.25,78.125,0),vector(24.375,78.25,0),vector(24.5,78.125,0),vector(24.625,77.75,0),vector(24.75,76.875,0),vector(24.875,76.125,0),vector(25,75,0),vector(25.125,73.375,0),vector(25.25,71.375,0),vector(25.375,69.375,0),vector(25.5,67.5,0),vector(25.625,64.875,0),vector(25.75,61.75,0),vector(25.875,58.875,0),vector(26,56,0),vector(26.125,52.25,0),vector(26.25,48,0),vector(26.375,44.125,0),vector(26.5,40.5,0),vector(26.625,36.5,0),vector(26.75,32.125,0),vector(26.875,28.75,0),vector(27,25.875,0),vector(27.125,22.625,0),vector(27.25,19.5,0),vector(27.375,17.125,0),vector(27.5,15,0),vector(27.625,12.625,0),vector(27.75,10.375,0),vector(27.875,8.875,0),vector(28,7.375,0),vector(28.125,5.75,0),vector(28.25,4.375,0),vector(28.375,3.5,0),vector(28.5,2.75,0),vector(28.625,2.125,0),vector(28.75,1.625,0),vector(28.875,1.25,0),vector(29,1.25,0),vector(29.125,1.375,0),vector(29.25,2,0),vector(29.375,2.5,0),vector(29.5,2.875,0),vector(29.625,4,0),vector(29.75,5.375,0),vector(29.875,6.625,0),vector(30,8,0),vector(30.125,9.75,0),vector(30.25,12,0),vector(30.375,14,0),vector(30.5,15.875,0),vector(30.625,18.5,0),vector(30.75,21.75,0),vector(30.875,24.25,0),vector(31,26.625,0),vector(31.125,29.5,0),vector(31.25,32.625,0),vector(31.375,34.375,0),vector(31.5,35.875,0),vector(31.625,38,0),vector(31.75,39.625,0),vector(31.875,40.75,0),vector(32,41.75,0),vector(32.125,42.75,0),vector(32.25,43.75,0),vector(32.375,44.5,0),vector(32.5,45.25,0),vector(32.625,45.875,0),vector(32.75,46.625,0),vector(32.875,47,0),vector(33,47.375,0),vector(33.125,47.75,0),vector(33.25,47.875,0),vector(33.375,48,0),vector(33.5,48.125,0),vector(33.625,48.25,0),vector(33.75,48.125,0),vector(33.875,48,0),vector(34,47.875,0),vector(34.125,47.625,0),vector(34.25,47.125,0),vector(34.375,46.75,0),vector(34.5,46.25,0),vector(34.625,45.625,0),vector(34.75,44.75,0),vector(34.875,44,0),vector(35,43.25,0),vector(35.125,42.25,0),vector(35.25,41,0),vector(35.375,40,0),vector(35.5,39,0),vector(35.625,37.75,0),vector(35.75,36.25,0),vector(35.875,35,0),vector(36,33.75,0),vector(36.125,32.25,0),vector(36.25,30.75,0),vector(36.375,29.75,0),vector(36.5,28.75,0),vector(36.625,27.625,0),vector(36.75,26.5,0),vector(36.875,25.75,0),vector(37,24.875,0),vector(37.125,24.125,0),vector(37.25,23.375,0),vector(37.375,22.875,0),vector(37.5,22.5,0),vector(37.625,21.875,0),vector(37.75,21.625,0),vector(37.875,21.375,0),vector(38,21.25,0),vector(38.125,21.25,0),vector(38.25,21.25,0),vector(38.375,21.25,0),vector(38.5,21.375,0),vector(38.625,21.5,0),vector(38.75,21.875,0),vector(38.875,22.25,0),vector(39,22.625,0),vector(39.125,23.25,0),vector(39.25,23.875,0),vector(39.375,24.625,0),vector(39.5,25.375,0),vector(39.625,26.25,0),vector(39.75,27.375,0),vector(39.875,28.25,0),vector(40,29.25,0),vector(40.125,30.5,0),vector(40.25,31.75,0),vector(40.375,32.875,0),vector(40.5,34,0),vector(40.625,34.75,0),vector(40.75,35.625,0),vector(40.875,36.125,0),vector(41,36.625,0),vector(41.125,37.125,0),vector(41.25,37.625,0),vector(41.375,37.875,0),vector(41.5,38.125,0),vector(41.625,38.5,0),vector(41.75,38.75,0),vector(41.875,38.875,0),vector(42,39,0),vector(42.125,39.125,0),vector(42.25,39.25,0),vector(42.375,39.375,0),vector(42.5,39.375,0),vector(42.625,39.5,0),vector(42.75,39.5,0),vector(42.875,39.5,0),vector(43,39.5,0),vector(43.125,39.375,0),vector(43.25,39.375,0),vector(43.375,39.25,0),vector(43.5,39.125,0),vector(43.625,39,0),vector(43.75,38.875,0),vector(43.875,38.75,0),vector(44,38.5,0),vector(44.125,38.25,0),vector(44.25,37.875,0),vector(44.375,37.5,0),vector(44.5,37.125,0),vector(44.625,36.875,0),vector(44.75,36.375,0),vector(44.875,35.875,0),vector(45,35.5,0),vector(45.125,35,0),vector(45.25,34.375,0),vector(45.375,34,0),vector(45.5,33.625,0),vector(45.625,33.25,0),vector(45.75,33,0),vector(45.875,32.875,0),vector(46,32.75,0),vector(46.125,32.625,0),vector(46.25,32.5,0),vector(46.375,32.375,0),vector(46.5,32.375,0),vector(46.625,32.25,0),vector(46.75,32.375,0),vector(46.875,32.375,0),vector(47,32.5,0),vector(47.125,32.625,0),vector(47.25,32.75,0),vector(47.375,32.875,0),vector(47.5,33.125,0),vector(47.625,33.25,0),vector(47.75,33.625,0),vector(47.875,33.75,0),vector(48,34,0),vector(48.125,34.125,0),vector(48.25,34.25,0),vector(48.375,34.375,0),vector(48.5,34.5,0),vector(48.625,34.625,0),vector(48.75,34.625,0)]
 
-pulse_list=[vector(0,34.625,0),vector(0.125,34.625,0),vector(0.25,34.5,0),vector(0.375,34.375,0),vector(0.5,34.25,0),vector(0.625,34.125,0),vector(0.75,34,0),vector(0.875,33.75,0),vector(1,33.625,0),vector(1.125,33.25,0),vector(1.25,33.125,0),vector(1.375,32.875,0),vector(1.5,32.75,0),vector(1.625,32.625,0),vector(1.75,32.5,0),vector(1.875,32.375,0),vector(2,32.375,0),vector(2.125,32.25,0),vector(2.25,32.375,0),vector(2.375,32.375,0),vector(2.5,32.5,0),vector(2.625,32.625,0),vector(2.75,32.75,0),vector(2.875,32.875,0),vector(3,33,0),vector(3.125,33.25,0),vector(3.25,33.625,0),vector(3.375,34,0),vector(3.5,34.375,0),vector(3.625,35,0),vector(3.75,35.5,0),vector(3.875,35.875,0),vector(4,36.375,0),vector(4.125,36.875,0),vector(4.25,37.125,0),vector(4.375,37.5,0),vector(4.5,37.875,0),vector(4.625,38.25,0),vector(4.75,38.5,0),vector(4.875,38.75,0),vector(5,38.875,0),vector(5.125,39,0),vector(5.25,39.125,0),vector(5.375,39.25,0),vector(5.5,39.375,0),vector(5.625,39.375,0),vector(5.75,39.5,0),vector(5.875,39.5,0),vector(6,39.5,0),vector(6.125,39.5,0),vector(6.25,39.375,0),vector(6.375,39.375,0),vector(6.5,39.25,0),vector(6.625,39.125,0),vector(6.75,39,0),vector(6.875,38.875,0),vector(7,38.75,0),vector(7.125,38.5,0),vector(7.25,38.125,0),vector(7.375,37.875,0),vector(7.5,37.625,0),vector(7.625,37.125,0),vector(7.75,36.625,0),vector(7.875,36.125,0),vector(8,35.625,0),vector(8.125,34.75,0),vector(8.25,34,0),vector(8.375,32.875,0),vector(8.5,31.75,0),vector(8.625,30.5,0),vector(8.75,29.25,0),vector(8.875,28.25,0),vector(9,27.375,0),vector(9.125,26.25,0),vector(9.25,25.375,0),vector(9.375,24.625,0),vector(9.5,23.875,0),vector(9.625,23.25,0),vector(9.75,22.625,0),vector(9.875,22.25,0),vector(10,21.875,0),vector(10.125,21.5,0),vector(10.25,21.375,0),vector(10.375,21.25,0),vector(10.5,21.25,0),vector(10.625,21.25,0),vector(10.75,21.25,0),vector(10.875,21.375,0),vector(11,21.625,0),vector(11.125,21.875,0),vector(11.25,22.5,0),vector(11.375,22.875,0),vector(11.5,23.375,0),vector(11.625,24.125,0),vector(11.75,24.875,0),vector(11.875,25.75,0),vector(12,26.5,0),vector(12.125,27.625,0),vector(12.25,28.75,0),vector(12.375,29.75,0),vector(12.5,30.75,0),vector(12.625,32.25,0),vector(12.75,33.75,0),vector(12.875,35,0),vector(13,36.25,0),vector(13.125,37.75,0),vector(13.25,39,0),vector(13.375,40,0),vector(13.5,41,0),vector(13.625,42.25,0),vector(13.75,43.25,0),vector(13.875,44,0),vector(14,44.75,0),vector(14.125,45.625,0),vector(14.25,46.25,0),vector(14.375,46.75,0),vector(14.5,47.125,0),vector(14.625,47.625,0),vector(14.75,47.875,0),vector(14.875,48,0),vector(15,48.125,0),vector(15.125,48.25,0),vector(15.25,48.125,0),vector(15.375,48,0),vector(15.5,47.875,0),vector(15.625,47.75,0),vector(15.75,47.375,0),vector(15.875,47,0),vector(16,46.625,0),vector(16.125,45.875,0),vector(16.25,45.25,0),vector(16.375,44.5,0),vector(16.5,43.75,0),vector(16.625,42.75,0),vector(16.75,41.75,0),vector(16.875,40.75,0),vector(17,39.625,0),vector(17.125,38,0),vector(17.25,35.875,0),vector(17.375,34.375,0),vector(17.5,32.625,0),vector(17.625,29.5,0),vector(17.75,26.625,0),vector(17.875,24.25,0),vector(18,21.75,0),vector(18.125,18.5,0),vector(18.25,15.875,0),vector(18.375,14,0),vector(18.5,12,0),vector(18.625,9.75,0),vector(18.75,8,0),vector(18.875,6.625,0),vector(19,5.375,0),vector(19.125,4,0),vector(19.25,2.875,0),vector(19.375,2.5,0),vector(19.5,2,0),vector(19.625,1.375,0),vector(19.75,1.25,0),vector(19.875,1.25,0),vector(20,1.625,0),vector(20.125,2.125,0),vector(20.25,2.75,0),vector(20.375,3.5,0),vector(20.5,4.375,0),vector(20.625,5.75,0),vector(20.75,7.375,0),vector(20.875,8.875,0),vector(21,10.375,0),vector(21.125,12.625,0),vector(21.25,15,0),vector(21.375,17.125,0),vector(21.5,19.5,0),vector(21.625,22.625,0),vector(21.75,25.875,0),vector(21.875,28.75,0),vector(22,32.125,0),vector(22.125,36.5,0),vector(22.25,40.5,0),vector(22.375,44.125,0),vector(22.5,48,0),vector(22.625,52.25,0),vector(22.75,56,0),vector(22.875,58.875,0),vector(23,61.75,0),vector(23.125,64.875,0),vector(23.25,67.5,0),vector(23.375,69.375,0),vector(23.5,71.375,0),vector(23.625,73.375,0),vector(23.75,75,0),vector(23.875,76.125,0),vector(24,76.875,0),vector(24.125,77.75,0),vector(24.25,78.125,0),vector(24.375,78.25,0),vector(24.5,78.125,0),vector(24.625,77.75,0),vector(24.75,76.875,0),vector(24.875,76.125,0),vector(25,75,0),vector(25.125,73.375,0),vector(25.25,71.375,0),vector(25.375,69.375,0),vector(25.5,67.5,0),vector(25.625,64.875,0),vector(25.75,61.75,0),vector(25.875,58.875,0),vector(26,56,0),vector(26.125,52.25,0),vector(26.25,48,0),vector(26.375,44.125,0),vector(26.5,40.5,0),vector(26.625,36.5,0),vector(26.75,32.125,0),vector(26.875,28.75,0),vector(27,25.875,0),vector(27.125,22.625,0),vector(27.25,19.5,0),vector(27.375,17.125,0),vector(27.5,15,0),vector(27.625,12.625,0),vector(27.75,10.375,0),vector(27.875,8.875,0),vector(28,7.375,0),vector(28.125,5.75,0),vector(28.25,4.375,0),vector(28.375,3.5,0),vector(28.5,2.75,0),vector(28.625,2.125,0),vector(28.75,1.625,0),vector(28.875,1.25,0),vector(29,1.25,0),vector(29.125,1.375,0),vector(29.25,2,0),vector(29.375,2.5,0),vector(29.5,2.875,0),vector(29.625,4,0),vector(29.75,5.375,0),vector(29.875,6.625,0),vector(30,8,0),vector(30.125,9.75,0),vector(30.25,12,0),vector(30.375,14,0),vector(30.5,15.875,0),vector(30.625,18.5,0),vector(30.75,21.75,0),vector(30.875,24.25,0),vector(31,26.625,0),vector(31.125,29.5,0),vector(31.25,32.625,0),vector(31.375,34.375,0),vector(31.5,35.875,0),vector(31.625,38,0),vector(31.75,39.625,0),vector(31.875,40.75,0),vector(32,41.75,0),vector(32.125,42.75,0),vector(32.25,43.75,0),vector(32.375,44.5,0),vector(32.5,45.25,0),vector(32.625,45.875,0),vector(32.75,46.625,0),vector(32.875,47,0),vector(33,47.375,0),vector(33.125,47.75,0),vector(33.25,47.875,0),vector(33.375,48,0),vector(33.5,48.125,0),vector(33.625,48.25,0),vector(33.75,48.125,0),vector(33.875,48,0),vector(34,47.875,0),vector(34.125,47.625,0),vector(34.25,47.125,0),vector(34.375,46.75,0),vector(34.5,46.25,0),vector(34.625,45.625,0),vector(34.75,44.75,0),vector(34.875,44,0),vector(35,43.25,0),vector(35.125,42.25,0),vector(35.25,41,0),vector(35.375,40,0),vector(35.5,39,0),vector(35.625,37.75,0),vector(35.75,36.25,0),vector(35.875,35,0),vector(36,33.75,0),vector(36.125,32.25,0),vector(36.25,30.75,0),vector(36.375,29.75,0),vector(36.5,28.75,0),vector(36.625,27.625,0),vector(36.75,26.5,0),vector(36.875,25.75,0),vector(37,24.875,0),vector(37.125,24.125,0),vector(37.25,23.375,0),vector(37.375,22.875,0),vector(37.5,22.5,0),vector(37.625,21.875,0),vector(37.75,21.625,0),vector(37.875,21.375,0),vector(38,21.25,0),vector(38.125,21.25,0),vector(38.25,21.25,0),vector(38.375,21.25,0),vector(38.5,21.375,0),vector(38.625,21.5,0),vector(38.75,21.875,0),vector(38.875,22.25,0),vector(39,22.625,0),vector(39.125,23.25,0),vector(39.25,23.875,0),vector(39.375,24.625,0),vector(39.5,25.375,0),vector(39.625,26.25,0),vector(39.75,27.375,0),vector(39.875,28.25,0),vector(40,29.25,0),vector(40.125,30.5,0),vector(40.25,31.75,0),vector(40.375,32.875,0),vector(40.5,34,0),vector(40.625,34.75,0),vector(40.75,35.625,0),vector(40.875,36.125,0),vector(41,36.625,0),vector(41.125,37.125,0),vector(41.25,37.625,0),vector(41.375,37.875,0),vector(41.5,38.125,0),vector(41.625,38.5,0),vector(41.75,38.75,0),vector(41.875,38.875,0),vector(42,39,0),vector(42.125,39.125,0),vector(42.25,39.25,0),vector(42.375,39.375,0),vector(42.5,39.375,0),vector(42.625,39.5,0),vector(42.75,39.5,0),vector(42.875,39.5,0),vector(43,39.5,0),vector(43.125,39.375,0),vector(43.25,39.375,0),vector(43.375,39.25,0),vector(43.5,39.125,0),vector(43.625,39,0),vector(43.75,38.875,0),vector(43.875,38.75,0),vector(44,38.5,0),vector(44.125,38.25,0),vector(44.25,37.875,0),vector(44.375,37.5,0),vector(44.5,37.125,0),vector(44.625,36.875,0),vector(44.75,36.375,0),vector(44.875,35.875,0),vector(45,35.5,0),vector(45.125,35,0),vector(45.25,34.375,0),vector(45.375,34,0),vector(45.5,33.625,0),vector(45.625,33.25,0),vector(45.75,33,0),vector(45.875,32.875,0),vector(46,32.75,0),vector(46.125,32.625,0),vector(46.25,32.5,0),vector(46.375,32.375,0),vector(46.5,32.375,0),vector(46.625,32.25,0),vector(46.75,32.375,0),vector(46.875,32.375,0),vector(47,32.5,0),vector(47.125,32.625,0),vector(47.25,32.75,0),vector(47.375,32.875,0),vector(47.5,33.125,0),vector(47.625,33.25,0),vector(47.75,33.625,0),vector(47.875,33.75,0),vector(48,34,0),vector(48.125,34.125,0),vector(48.25,34.25,0),vector(48.375,34.375,0),vector(48.5,34.5,0),vector(48.625,34.625,0),vector(48.75,34.625,0)]
 #test_photon=curve(pos=pulse_list, color=vec(0,0.5,0), radius=1, canvas=scene, origin=vector(-110,-40,0))
 message_list = []
-num_PE=0
-num_CS=0
-N=0
-num_trans=0
-my_element_changed=False
-remember_m_index=0
+num_PE = 0
+num_CS = 0
+N = 0
+num_trans = 0
+my_element_changed = False
+remember_m_index = 0
 
 #Objects
 
@@ -117,12 +145,50 @@ pe_schem = box(pos=vector(0,0,0), length=scene.width/2, height=scene.width/2, wi
 cs_schem = box(pos=vector(0,0,0), length=scene.width/2, height=scene.width/2, width=0.5, texture="https://webdev2.watzek.cloud/~nddill/scanningSims/images/projection_Radiography/Compton.png", shininess=0, visible = False, color=color.white)
 trans_schem = box(pos=vector(0,0,0), length=scene.width/2, height=scene.width/2, width=0.5, texture="https://webdev2.watzek.cloud/~nddill/scanningSims/images/projection_Radiography/Atom.png", shininess=0, visible = False, color=color.white)
 current_element = water
+
 current_lbl=my_water_lbl
-my_PE_label=label(pos=vector(0,-230,0), text="Photoelectric event!", box=False, color=vector(0,0.3,0.3), height=text_size, opacity=0, visible=False)
-my_CS_label=label(pos=vector(0,-230,0), text="Compton scattering event!", box=False, color=vector(0,0.3,0.3), height=text_size, opacity=0, visible=False)
-my_TR_label=label(pos=vector(0,-230,0), text="Transmission!", box=False, color=vector(0,0.3,0.3), height=text_size, opacity=0, visible=False)
-my_mech_lbl_list=[my_PE_label, my_CS_label,my_TR_label]
-my_target_lbl_list=[my_water_lbl,my_bone_lbl,my_lead_lbl]
+
+my_PE_label=label(
+    pos=vector(0,-230,0),
+    text="Photoelectric event!",
+    box=False,
+    color=vector(0,0.3,0.3),
+    height=text_size,
+    opacity=0,
+    visible=False
+    )
+
+my_CS_label=label(
+    pos=vector(0,-230,0),
+    text="Compton scattering event!",
+    box=False,
+    color=vector(0,0.3,0.3),
+    height=text_size,
+    opacity=0,
+    visible=False
+    )
+
+my_TR_label=label(
+    pos=vector(0,-230,0),
+    text="Transmission!",
+    box=False,
+    color=vector(0,0.3,0.3),
+    height=text_size,
+    opacity=0,
+    visible=False
+    )
+
+my_mech_lbl_list=[
+    my_PE_label,
+    my_CS_label,
+    my_TR_label
+    ]
+
+my_target_lbl_list=[
+    my_water_lbl,
+    my_bone_lbl,
+    my_lead_lbl
+    ]
 #scaling_sphere = sphere(pos=vector(atoms_loc,0,0), radius=5, opacity=0)
 
 #Rescaling original pulse and changing start point on y
@@ -135,8 +201,29 @@ for i in range(len(pulse_list)):
 #Create Title
 scaling_sphere1=sphere(pos=vector(0,-300,0), opacity=0)
 scaling_sphere2=sphere(pos=vector(0,-1*atomic_label.pos.y+7*text_size,0), opacity=0)
-title = label(pos=vector(0,-1*atomic_label.pos.y+8*text_size,0), text='Explore Interactions Between Diagnostic X-rays and Matter', font='helvetica', height=1.5*text_size, box=False, visible=True, color=color.black, opacity=0)
-lbl_start=label(pos=vector(0,-330,0), text="Start with Activities (link at top)!", font="helvetica", box=True, canvas=scene, color=vector(0,0.36,0.39), height=15, visible=True, opacity=0)
+
+title = label(
+    pos=vector(0,-1*atomic_label.pos.y+8*text_size,0), 
+    text='Explore Interactions Between Diagnostic X-rays and Matter', 
+    font='helvetica', 
+    height=1.5*text_size, 
+    box=False, 
+    visible=True, 
+    color=color.black, 
+    opacity=0
+    )
+    
+lbl_start=label(
+    pos=vector(0,-330,0), 
+    text="Start with Activities (link at top)!", 
+    font="helvetica", 
+    box=True, 
+    canvas=scene, 
+    color=vector(0,0.36,0.39), 
+    height=15, 
+    visible=True, 
+    opacity=0
+    )
 
 # Hyperlinks 
 s = '''<font size=4> <font>'''
@@ -170,27 +257,33 @@ scene.append_to_title(l)
 # Functions
 
 def event_type_print(type):
+
     global event_type, num_CS, num_trans, num_PE, N
-    event_type=type
-    if event_type==1:
-        my_PE_label.visible=True
-        num_PE=num_PE+1
-    if event_type==2:
-        my_CS_label.visible=True
-        num_CS=num_CS+1
-    if event_type==3:
-        my_TR_label.visible=True
-        num_trans=num_trans+1
-    N=num_PE+num_CS+num_trans
-   
-    
-def caption_print(text): 
+
+    event_type = type
+
+    if event_type == 1: #start photoeletric effect-jc
+        my_PE_label.visible = True
+        num_PE = num_PE+1
+
+    if event_type == 2: #start compton scattering -jc
+        my_CS_label.visible = True
+        num_CS = num_CS+1
+
+    if event_type == 3: #Transmission -jc
+        my_TR_label.visible = True
+        num_trans = num_trans+1
+
+    N = num_PE + num_CS + num_trans
+
+
+def caption_print(text):
     global message_list
     if len(message_list) < 10:
         control_panel.append_to_caption(text)
         message_list.append(text)
     else:
-        control_panel.caption=''
+        control_panel.caption = ''
         for i in range(len(message_list)-1):
             message_list[i] = message_list[i+1]
         message_list[9] = text
@@ -198,70 +291,140 @@ def caption_print(text):
             control_panel.append_to_caption(i)   
 
 def create_photon(loc): #Fix photons not all starting at source
-    new_photon=curve(pos=pulse_list, color=vec(0,0.5,0), radius=1, canvas=scene, origin=loc)
+    new_photon=curve(
+        pos = pulse_list, #see pulse list for context, draws the shape of the pulse in the simulation -jc
+        color = vec(0,0.5,0), 
+        radius = 1, 
+        canvas = scene, 
+        origin = loc
+        )
     return new_photon
     
 def move_objects(objects, directions, ends, speed=3): #objects is a list (e.g., x_ray or x_ray and sphere)
     travel_vector = vector(1,0,0)
-    remember_view = is_atomic 
+
+    remember_view =is_atomic
+
     number_done = 0
+
     while number_done < len(objects):
+        #number done is effectively a time tracker, it makes sure each object takes its "turn" before more time passes
         rate(animation_speed)
+
         if is_atomic != remember_view:
-            break
+            break #stop if not in atomic view -jc
+
         if propagating:
+
             for i in range(len(objects)):
-                if isinstance(objects[i], sphere): #checks an electron
+
+                if isinstance(objects[i], sphere): #checks if object is an electron
+
                     if objects[i].pos.x <= ends[i].x:
-                        objects[i].pos += speed*hat(directions[i]) #hat() function gives unit vector along the direction of the vector argument 
-                        objects[i].opacity -=(i+1)*0.003
+
+                        objects[i].pos += speed*hat(directions[i]) 
+
+                        #hat() function gives unit vector along the direction of the vector argument
+                        objects[i].opacity -= (i+1) * 0.003
+
                         if objects[i].pos.x >= ends[i].x:
+
                             number_done += 1
-                elif isinstance(objects[i], curve): #checks a photon
+
+                elif isinstance(objects[i], curve): #checks if object is a photon
+
                     if objects[i].origin.x <= ends[i].x:
                         objects[i].origin += speed*hat(directions[i])
                         if objects[i].origin.x >= ends[i].x:
                             number_done += 1
-    
-def interaction(photon, in_vector):
+
+#takes an incoming x ray, and deceides behavior based on material and energy of the photon -jc
+def interaction(photon, in_vector): 
+
     global PE, CS, TR
-    rand = random()
-    probComp = 0.25 #see 32186.pdf
+
+    rand = random() #random number between zero and one -jc
+
+    probComp = 0.25 #see 32186.pdf 
+    #4 possible compton animations, this sets the probability to be 1/4, not sure why author comment so vauge -jc
+
     if Z==7.4: #from text page 217, check how mu's depend on energy to get rand (transmission) right
+
         if E==20:
+
+            #roll for chance to pass through -jc
             if rand>=0.9: # for mu=0.78 x=3 cm page 240 of text > 10% transmission
+
                 event_type_print(3)
-                return in_vector  
-            elif rand>=0.585:#probPE=0.65 .9*0.65=0.585 
+                return in_vector
+
+            #roll for compton effect -jc
+            elif rand>=0.585:#probPE=0.65 .9*0.65=0.585
+
                 event_type_print(2)
-                return (hat(vector(sqrt(2)/2 + random()*(1-sqrt(2)/2), -sqrt(2)/2 + random()*(sqrt(2)), 0)))
-            else: 
+                return ( #returns a normalised vector, with randomised vertical/horizontal velocity -jc
+                    hat( 
+                        vector(
+                            sqrt(2)/2 + random()*(1-sqrt(2)/2),
+                            -sqrt(2)/2 + random()*(sqrt(2)),
+                            0
+                            )
+                        )
+                    )
+
+            #roll for PE effect -jc
+            else:
+
                 event_type_print(1)
                 photon.visible = False
-                return vector(1,0,0)            
+                return vector(1,0,0)
+
         if E==60:
+
+            #roll for pass through -jc
             if rand>=0.45: #see text page 240 for different mu's > 55% at 60 KeV
+
                 event_type_print(3)
-                return in_vector  
+                return in_vector
+
+            #roll for compton effect -jc
             elif rand>=0.0315: #probPE=0.07
+
                 event_type_print(2)
                 return (hat(vector(sqrt(2)/2 + random()*(1-sqrt(2)/2), -sqrt(2)/2 + random()*(sqrt(2)), 0)))
+
+            #roll for PE effect -jc
+            else:
+
+                event_type_print(1)
+                photon.visible = False
+                return vector(1,0,0)
+
+        if E==100:
+
+            #roll for pass through -jc
+            if rand>=0.39: #mu=0.167 (61% trans) from https://www.nuclear-power.com/nuclear-power/reactor-physics/atomic-nuclear-physics/radiation/x-rays-roentgen-radiation/linear-and-mass-attenuation-coefficient-x-rays/
+                
+                event_type_print(3)
+                return in_vector
+
+            #roll for compton effect -jc
+            elif rand>=0.008: #0.39*0.02  probPE=0.02
+
+                event_type_print(2)
+                return (hat(vector(sqrt(2)/2 + random()*(1-sqrt(2)/2), -sqrt(2)/2 + random()*(sqrt(2)), 0)))
+
+            #roll for PE effect -jc
             else:
                 event_type_print(1)
                 photon.visible = False
                 return vector(1,0,0)
-        if E==100:
-            if rand>=0.39: #mu=0.167 (61% trans) from https://www.nuclear-power.com/nuclear-power/reactor-physics/atomic-nuclear-physics/radiation/x-rays-roentgen-radiation/linear-and-mass-attenuation-coefficient-x-rays/
-                event_type_print(3)
-                return in_vector  
-            elif rand>=0.008: #0.39*0.02  probPE=0.02
-                event_type_print(2)
-                return (hat(vector(sqrt(2)/2 + random()*(1-sqrt(2)/2), -sqrt(2)/2 + random()*(sqrt(2)), 0)))
-            else:
-                event_type_print(1)
-                photon.visible = False
-                return vector(1,0,0)          
-    if Z==13.8: 
+
+    #The same exact code is repeated bellow but with different values of Z,E. -jc
+    #The function just rolls on a table based on the differen values. -jc
+    #The three results are programed the same as above. -jc
+
+    if Z==13.8:
         if E==20:
             if rand>=1.0: # for mu=4.8 x=3 cm page 240 of text > no transmission
                 event_type_print(3)
@@ -301,7 +464,7 @@ def interaction(photon, in_vector):
         photon.visible = False
         return vector(1,0,0)
 
-def randomize_compton_position():
+def randomize_compton_position(): #randomly selects a starting posistion for the compton electron.
     global compton_electronLoc, url, x_corr, electron_y
     animation_choice = choice(list(COMPTON_ANIMATION.keys()))
     compton_electronLoc, url, x_corr, electron_y = COMPTON_ANIMATION[animation_choice]
@@ -311,56 +474,89 @@ def randomize_compton_position():
 
 
 def resetAtomic():
+
     global has_run, started, PE_scatteredElectron, PE_dropElectron, compton_electron
-    if button_box_list[2].color == color.green:
+
+    if button_box_list[2].color == color.green: #check if user has clicked the start button -jc
         randomize_compton_position()
+    
     PE_scatterElectron.pos = PE_scatterElectronLoc
     PE_dropElectron.pos = PE_dropElectronLoc
     compton_electron.pos = compton_electronLoc
     PE_scatterElectron.opacity = 1
     PE_dropElectron.opacity = 1
+
     if has_run:
+
         for i in range(0,3):
-            my_electrons_list[i].visible=False
+
+            my_electrons_list[i].visible=False #all electrons (that should exist) are rendered invisible -jc
+        
         for i in range(1,4):
-            if button_box_list[i].color==vector(0.7,0.7,0.7):
+
+            if button_box_list[i].color == vector(0.7,0.7,0.7):
                 my_mech_atomic_list[i-1].visible=False
+        
         for i in range(1,4):
+
             if button_box_list[i].color==color.green and i==1:
+
                     my_electrons_list[i-1].visible=True
                     my_electrons_list[i].visible=True
+
             elif button_box_list[i].color==color.green and i==2:
+
                 my_electrons_list[i].visible=True
                 my_electrons_list[i].opacity=1
-    has_run = False
-    started = False
+
+    has_run = False #reset the running status but doesnt reset everything because of remember_has_run -jc
+
+    started = False #stops the simulation
     #animation_speed=1000
 
 def switchView():
+
     global is_atomic, running, propagating, started, has_run, my_evt, num_PE, num_CS, num_trans, my_mech_lbl
-    loc_b=scene.mouse.pos
-    if abs(loc_b.x-lbl_start1.pos.x)<=100 and abs(loc_b.y-lbl_start1.pos.y)<=text_size:
-        if not started_atomic:
-            is_atomic = not is_atomic
-            my_error2_lbl.visible=False
+
+    loc_b = scene.mouse.pos #stores mouse posistion in loc_b -jc
+
+    if abs(loc_b.x - lbl_start1.pos.x) <= 100 and abs(loc_b.y - lbl_start1.pos.y) <= text_size:#checks if the mouse is inside the button -jc
+        
+        if not started_atomic: #activates if started atomic is false-jc
+
+            is_atomic = not is_atomic #
+            my_error2_lbl.visible = False
             button_box_list[0].color = vector(0.7,0.7,0.7)
+
             if started:
-                xray.visible=False
+                xray.visible = False #clicking the start/stop button while the program is running stops the program -jc
+
             if is_atomic:
+
                 for i in range(0,3):
-                    my_target_lbl_list[i].visible=False
-                current_element.visible=False
-                bg_menu.disabled=True
-                E_slider.disabled=True
+                    my_target_lbl_list[i].visible = False
+
+                #disable the menu and sliders while hiding the non atomic images -jc
+                current_element.visible = False
+                bg_menu.disabled = True
+                E_slider.disabled = True
+
+                #prevent the user from clicking certain buttons -jc
                 control_panel.bind("mousedown", pe_but)
                 control_panel.bind("mousedown", cs_but)
                 control_panel.bind("mousedown", trans_but)
-                atomic_viewBox.visible=False
-                lbl_start1.visible=False
-                my_mech_lbl.visible=True
+                atomic_viewBox.visible = False
+                lbl_start1.visible = False
+
+                #use the atomic image -jc
+                my_mech_lbl.visible = True
+
+                #foce the program to halt until a simulation type is chosen (ie: photoelectric/compton effect) -jc
                 my_evt=control_panel.waitfor('mousedown') #wait until mouse event chooses mechanism. Specify canvas.
                 caption_print("Switched to mechanistic view\n")
                 control_panel.bind("mousedown", Run)
+
+                #change the viewable objects -jc
                 medium_box.visible = False
                 medium_label.visible = False
                 detector_box.visible = False
@@ -377,27 +573,43 @@ def switchView():
                 my_CStot_lbl.visible=False
             else:
                 caption_print("Switched to target view\n")
-                E_slider.disabled=False
-                bg_menu.disabled=False
-                animation_speed=1000
+
+                #re-enable the sliders and menu
+                E_slider.disabled = False
+                bg_menu.disabled = False
+                animation_speed = 1000
+
                 for i in range(0,3):
-                    my_mech_atomic_list[i].visible=False
-                    my_mech_lbl_list[i].visible=False
+
+                    #hide the atomic view elements -jc
+                    my_mech_atomic_list[i].visible = False
+                    my_mech_lbl_list[i].visible = False
+
                     if i==remember_m_index:
-                        my_targets_list[i].visible=True                      
-                my_mech_atomic_list[i-1].visible=False
+
+                        #restore the target  view elemens -jc
+                        my_targets_list[i].visible = True
+
+                my_mech_atomic_list[i-1].visible = False
+
                 for i in range(1,4):
-                    button_box_list[i].color=vector(0.7,0.7,0.7)
-                num_PE=0
-                num_CS=0
-                num_trans=0
+
+                    button_box_list[i].color = vector(0.7,0.7,0.7)
+
+                num_PE = 0
+                num_CS = 0
+                num_trans = 0
+
+                #restore user control
                 control_panel.bind("mousedown", Run)
                 control_panel.unbind("mousedown", pe_but)
                 control_panel.unbind("mousedown", cs_but)
                 control_panel.unbind("mousedown", trans_but)
-                lbl_start2.visible=False
-                lbl_start1.visible=True
-                my_mech_lbl.visible=False
+
+                #alter the visible and invisible elements -jc
+                lbl_start2.visible = False
+                lbl_start1.visible = True
+                my_mech_lbl.visible = False
                 PE_scatterElectron.visible = False
                 PE_dropElectron.visible = False
                 atomic_label.visible = False
@@ -418,161 +630,277 @@ def switchView():
 
 scene.bind("mousedown", switchView)
 
-def adjust_E(s):
+def adjust_E(s): #mantains the energy valuse based on the slider and allows user adjustment -jc
     global E, num_CS, num_PE, num_trans
-    E=s.value #E is slider value
-    E_caption.text="<font size=4> E = <font>"+ str(E) + "keV"
-    num_PE=0
-    num_CS=0
-    num_trans=0
-    pe_tot_lbl.visible=False
-    cs_tot_lbl.visible=False
-    tr_tot_lbl.visible=False  
-E_slider = slider(bind=adjust_E, min=20, max=100, step=40, value=E, length=200, width=10) #Set these so could use PE percentages from page 217 of text (Table 11.1)
+    E = s.value #E is slider value
+    E_caption.text = "<font size=4> E = <font>"+ str(E) + "keV"
+    num_PE = 0
+    num_CS = 0
+    num_trans = 0
+    pe_tot_lbl.visible = False
+    cs_tot_lbl.visible = False
+    tr_tot_lbl.visible = False
+
+#Set these so could use PE percentages from page 217 of text (Table 11.1)
+E_slider = slider(
+    bind=adjust_E,
+    min=20, 
+    max=100, 
+    step=40, 
+    value=E, 
+    length=200, 
+    width=10
+    ) 
+
 E_caption = wtext(text="<font size=4> E<font> =<font>"+ str(E) + "keV   ")
 #Create element menu
 
-# Menu from Lane
-def change_element(m):
+# Menu from Lane #what/who is lane?
+def change_element(m): #allows for the switching of the PNGs in target view
+
     global current_element, Z, current_lbl, num_CS, num_PE, num_trans, my_element_changed, remember_m_index
+
     my_element_changed = not my_element_changed
+
     scene.autoscale = False
-    current_element.visible=False
-    current_lbl.visible=False 
-    current_element=menu_elements[m.index]
-    remember_m_index=m.index
+
+    current_element.visible = False
+    current_lbl.visible = False
+    current_element = menu_elements[m.index]
+    remember_m_index = m.index
+
     #print('m.index=', remember_m_index)
-    current_lbl= element_names_list[m.index]
+
+    current_lbl = element_names_list[m.index]
     Z = float(menu_text[m.index]) #Use this to calculate probabilities in interaction()
+    
+    #hide current element -jc
     current_element.visible=True
     current_lbl.visible=True
+
     num_PE=0
     num_CS=0
     num_trans=0
     N=0
+
+    #show new element -jc
     pe_tot_lbl.visible=False
     cs_tot_lbl.visible=False
     tr_tot_lbl.visible=False
     my_element_changed=True
-wtext(text="               <font size=4>Atomic Number (Z) = <font>")
+    
+wtext(text = "               <font size=4>Atomic Number (Z) = <font>")
 menu_text = ["7.4","13.8","82"]  #Center numbers better
 menu_elements = [ water, bone, lead ]
-bg_menu = menu(bind=change_element, choices = menu_text)
+bg_menu = menu(bind = change_element, choices = menu_text)
 
 
-def adjust_speed(s):
+def adjust_speed(s): #simple function to control speed
+
     global animation_speed #animation_speed is slider value
     animation_speed = s.value
     speed_caption.text="<font size=4> Speed<font> =<font>"+ str(animation_speed)
+
 wtext(text="                 ")
 speed_slider = slider(bind=adjust_speed, min=500, max=2000, step=100, value=animation_speed, length=200, width=10)
 speed_caption = wtext(text="<font size=4> Speed<font> =<font>"+ str(animation_speed))
 
     
 #-------------------------------New canvas with control panel ---------------------------------------------------------------------------------------------------------------------------------------------------
-control_panel=canvas(width =1024, height=100, center = vector(0,0,0), background=vec(0.622, 0.779, 0.847), userspin=False, userzoom=False, resizable=False)
-title_cp=label(pos=vector(0,(control_panel.height/2)-text_size,0), text='Control Panel', font='helvetica', height=control_panel.height*(20/100), box=False, visible=True, color=color.black, opacity=0)
+control_panel = canvas(
+    width =1024, 
+    height=100, 
+    center = vector(0,0,0), 
+    background=vec(0.622, 0.779, 0.847), 
+    userspin=False, 
+    userzoom=False, 
+    resizable=False
+    )
+title_cp = label(
+    pos=vector(0,(control_panel.height/2)-text_size,0), 
+    text='Control Panel', 
+    font='helvetica', 
+    height=control_panel.height*(20/100), 
+    box=False, 
+    visible=True, 
+    color=color.black, 
+    opacity=0)
 
 button_box_list = []
 button_icon_list = []
 button_text_list = []
 button_greenbox_list = []
 button_size = 50
+
+#Creates Buttons given a destination, name and associated image -jc
 def create_buttons(chosen_canvas, text_list, icon_list): #Positioning buttons uniformly from -512 +side_buffer to 512 -side_buffer
+    
     global side_buffer, step
     side_buffer = chosen_canvas.width/100
     step = (chosen_canvas.width-2*side_buffer)/(len(text_list)-1)
-    for i in range(len(text_list)):
-        button_box_list.append(box(pos=vector((-chosen_canvas.width/2)+side_buffer+(i*step), -text_size/2, 0), length=control_panel.width*(button_size/1024), height=control_panel.height*(button_size/100), width=1, color=vec(0.5,0.5,0.5), shininess=0, opacity=0.3))
-        button_icon_list.append(label(pos=button_box_list[i].pos, text=icon_list[i], height=button_box_list[i].height/1.7, color=color.black, box=False, opacity=0))
-        button_text_list.append(label(pos=button_box_list[i].pos-vector(0,button_box_list[i].height/2+text_size,0), text=text_list[i], height=text_size, color=color.black, box=False, opacity=0))
 
+    for i in range(len(text_list)):
+
+        button_box_list.append(
+            box(
+                pos=vector((-chosen_canvas.width/2)+side_buffer+(i*step), -text_size/2, 0),
+                length=control_panel.width*(button_size/1024), 
+                height=control_panel.height*(button_size/100), 
+                width=1, 
+                color=vec(0.5,0.5,0.5), 
+                shininess=0, 
+                opacity=0.3
+                )    
+            )
+        button_icon_list.append(
+            label(
+                pos=button_box_list[i].pos, 
+                text=icon_list[i], 
+                height=button_box_list[i].height/1.7, 
+                color=color.black, 
+                box=False, 
+                opacity=0
+                )
+            )
+        button_text_list.append(
+            label(
+                pos=button_box_list[i].pos-vector(0,button_box_list[i].height/2+text_size,0),
+                text=text_list[i], 
+                height=text_size, 
+                color=color.black, 
+                box=False, 
+                opacity=0
+                )
+            )
+
+#sets up images for the control pannel -jc
 create_buttons(control_panel, ['Play/Pause', 'PE', 'Compton', 'Transmitted'], ['⏯','⚛️','📈','📡'])
 
 loc_b=vector(0,0,0)
+
 def Run():
+    
     global started, propagating, running, started_atomic, my_element_changed, num_CS, num_PE, num_trans, N, my_error_lbl, my_mech_lbl, N
-    loc_b=control_panel.mouse.pos
-    if abs(loc_b.x-button_box_list[0].pos.x)<=button_box_list[0].length/2 and abs(loc_b.y-button_box_list[0].pos.y)<=button_box_list[0].height/2: 
+    
+    #tracks the mouse's posistion in the control pannel -jc
+    loc_b = control_panel.mouse.pos
+
+    if abs(loc_b.x-button_box_list[0].pos.x) <= button_box_list[0].length/2 and abs(loc_b.y-button_box_list[0].pos.y)<=button_box_list[0].height/2:
         scene.autoscale=False
-        if N==100:
+
+        if N==100: #resets the x+ray count if it ever reaches 3 digits. -jc
             N=0
-        if my_mech_lbl.visible==True:
-            my_error_lbl.visible=True
-            my_mech_lbl.visible=False
+
+        #freeze the simulation in the event of an error -jc
+        if my_mech_lbl.visible == True:
+
+            my_error_lbl.visible = True
+            my_mech_lbl.visible = False
             return
-        running = not running
-        if my_element_changed==True:
+        
+        running = not running #sets running from false to true -jc
+
+        #set up trackers for different event types -jc
+        if my_element_changed == True:
             my_element_changed = not my_element_changed
-            num_PE=0
-            num_CS=0
-            num_trans=0 
-            N=0
+            num_PE = 0
+            num_CS = 0
+            num_trans = 0
+            N = 0
+
+        #running should be true at this moment -jc
         if running:
+
             if not started and not remember_has_run:
+
                 caption_print("Emiting X-rays!\n") #Appears in legend below control panel
                 caption_print("PE, Compton, and Transmitted buttons active only in Mechanistic View!\n")
                 started=True
+            
+            #start animation and change UI to show that -jc
             propagating = True
             button_box_list[0].color = color.green
+
+            #If in target view show target view buttons -jc
             if not is_atomic:
                 pe_tot_lbl.visible=True
                 cs_tot_lbl.visible=True
                 tr_tot_lbl.visible=True
                 E_slider.disabled=True
                 bg_menu.disabled=True
+
+            #If in  mechanistic view show corrisponding buttons -jc
             if is_atomic:
                 pe_tot_lbl.visible=False
                 cs_tot_lbl.visible=False
                 tr_tot_lbl.visible=False
                 started_atomic = True
-                if has_run:   #Check             
+
+                #Make sure that the canvas is set up properly if this isnt the first time mechinistic view has been set up -jc
+                if has_run:   #Check
                     resetAtomic()
+        
         elif not running: #just elif?
+            
+            #stop the animation if the program is shut off
             propagating=False
             button_box_list[0].color = vector(0.7,0.7,0.7)
+
             if not is_atomic:
+
+                #make sure menu is off while animation incomplete
                 E_slider.disabled=False
                 bg_menu.disabled=False
-            else: 
+
+            else:
+
+                #make sure menu is off while animation incomplete
                 E_slider.disabled=True
                 bg_menu.disabled=True
+
 control_panel.bind("mousedown", Run)
 #------------------------------
 #Create level buttons
 def pe_but():
+
     global PE_scatterElectron, PE_dropElectron, compton_electron
-    loc_b=control_panel.mouse.pos   
+    loc_b=control_panel.mouse.pos
+
     if abs(loc_b.x-button_box_list[1].pos.x)<=button_box_list[0].length/2 and abs(loc_b.y-button_box_list[1].pos.y)<=button_box_list[0].height/2:
+
+        #make electrons for PE effect sim visable and opaque -jc
         my_electrons_list[0].visible=True
+        my_electrons_list[1].visible=True
         my_electrons_list[0].opacity=1
         my_electrons_list[1].opacity=1
-        my_electrons_list[1].visible=True
-        PE_scatterElectron.visible=True
-        PE_scatterElectron.pos=PE_scatterElectronLoc
-        PE_dropElectron.pos=PE_dropElectronLoc
-        PE_scatterElectron.opacity=1
-        PE_dropElectron.opacity=1
-        PE_dropElectron.visible=True
-        my_error_lbl.visible=False
-        compton_electron.visible=False
-        my_PE_atomic.visible=True
-        my_CS_atomic.visible=False
+        
+        #set default PE visibility for all elements -jc
+
+        PE_scatterElectron.visible = True
+        PE_scatterElectron.pos = PE_scatterElectronLoc
+        PE_dropElectron.pos = PE_dropElectronLoc
+        PE_scatterElectron.opacity = 1
+        PE_dropElectron.opacity = 1
+        PE_dropElectron.visible = True
+        my_error_lbl.visible = False
+        compton_electron.visible = False
+        my_PE_atomic.visible = True
+        my_CS_atomic.visible = False
         lbl_compton.visible = False
-        my_trans_atomic.visible=False
-        pe_tot_lbl.visible=False
-        cs_tot_lbl.visible=False
-        tr_tot_lbl.visible=False
-        probability_box.visible=False
-        my_bone_lbl.visible=False
-        my_water_lbl.visible=False
-        my_lead_lbl.visible=False
-        my_prob_lbl.visible=False
-        my_CStot_lbl.visible=False
-        lbl_PE.visible=False
-        my_TRtot_lbl.visible=False
-        bg_menu.disabled=True
-        my_mech_lbl.visible=False
+        my_trans_atomic.visible = False
+        pe_tot_lbl.visible = False
+        cs_tot_lbl.visible = False
+        tr_tot_lbl.visible = False
+        probability_box.visible = False
+        my_bone_lbl.visible = False
+        my_water_lbl.visible = False
+        my_lead_lbl.visible = False
+        my_prob_lbl.visible = False
+        my_CStot_lbl.visible = False
+        my_PEtot_lbl.visible = False
+        my_TRtot_lbl.visible = False
+        bg_menu.disabled = True
+        my_mech_lbl.visible = False
         button_box_list[1].color = color.green
         button_box_list[2].color = vector(0.7,0.7,0.7)
         button_box_list[3].color = vector(0.7,0.7,0.7)
@@ -581,9 +909,13 @@ control_panel.unbind("mousedown", pe_but)
 
 
 def cs_but():
-    global PE_scatterElectron, PE_dropElectron, compton_electron, has_run
-    loc_b=control_panel.mouse.pos
+
+    global PE_scatterElectron, PE_dropElectron, compton_electron
+    loc_b = control_panel.mouse.pos
+
     if abs(loc_b.x-button_box_list[2].pos.x)<=button_box_list[0].length/2 and abs(loc_b.y-button_box_list[2].pos.y)<=button_box_list[0].height/2:
+        
+        #select one of the 4 random posistions -jc
         randomize_compton_position()
         compton_electron.visible=True
         compton_electron.opacity=1
@@ -591,6 +923,8 @@ def cs_but():
         my_electrons_list[2].visible=True
         my_electrons_list[2].opacity=1
         has_run=True
+
+        #set default compton visibility for all elements -jc
         PE_scatterElectron.visible=False
         PE_dropElectron.visible=False
         my_CS_atomic.visible=True
@@ -609,8 +943,12 @@ def cs_but():
         my_CStot_lbl.visible=False
         lbl_PE.visible=False
         my_TRtot_lbl.visible=False
+
+        #disable irrelevent menus -jc
         bg_menu.disabled=True
         my_mech_lbl.visible=False
+
+        #change buttons to accurately represent current state -jc
         button_box_list[1].color = vector(0.7,0.7,0.7)
         button_box_list[2].color = color.green
         button_box_list[3].color = vector(0.7,0.7,0.7)
@@ -619,8 +957,12 @@ def cs_but():
 control_panel.unbind("mousedown", cs_but)
 
 def trans_but(): #Make lead
+
     loc_b=control_panel.mouse.pos
+
     if abs(loc_b.x-button_box_list[3].pos.x)<=button_box_list[0].length/2 and abs(loc_b.y-button_box_list[3].pos.y)<=button_box_list[0].height/2:
+        
+        #set up visual status for transmission example -jc
         my_trans_atomic.visible=True
         my_CS_atomic.visible=False
         lbl_compton.visible = False
@@ -638,72 +980,133 @@ def trans_but(): #Make lead
         my_CStot_lbl.visible=False
         lbl_PE.visible=False
         my_TRtot_lbl.visible=False
+
+        #disable irrelevent menus -jc
         bg_menu.disabled=True
         my_mech_lbl.visible=False
+
+        #change buttons to accurately represent current state -jc
         button_box_list[1].color = vector(0.7,0.7,0.7)
         button_box_list[2].color = vector(0.7,0.7,0.7)
         button_box_list[3].color = color.green
+
         for i in range(0,3):
+
             my_electrons_list[i].visible=False
 #control_panel.bind("mousedown", trans_but)
 control_panel.unbind("mousedown", trans_but)
 
 #Running
 while True:
+
     rate(animation_speed)
+
     if propagating and not is_atomic and N<=99:
+
+        #create the photon -jc
         xray = create_photon(xray_source.pos+vector(xray_source.length/2,0,0))
+
+        #select the photon trajectory -jc
         initial_traj=hat(vector(cos(theta) + random()*(1-cos(theta)), -sin(theta) + random()*(2*sin(theta)), 0))
+
+        #start moving the photon -jc
         move_objects([xray], [initial_traj], [vector(0,0,0)], 3) #changed from medium_box.pos
+
+        #Modify (or keep) the electrion's behavior after the event occurs -jc
         move_objects([xray], [interaction(xray, initial_traj)], [detector_box.pos-vector(detector_box.length/2,0,0)], 3) #interaction calls event_type
+        
+        #Hide the old photon -jc
         xray.visible = False
         my_PE_label.visible=False
         my_CS_label.visible=False
         my_TR_label.visible=False
+
+        #update the different event counters -jc
         pe_tot_lbl.text = "{:.0f}".format(num_PE)
         cs_tot_lbl.text = "{:.0f}".format(num_CS)
         tr_tot_lbl.text = "{:.0f}".format(num_trans)
+
+    #this elif allows the program to function if we want the first simulations the be in atomic view -jc
     elif propagating and is_atomic and not has_run:
+
+        #set defaults for atomic view
         started_atomic = True
         animation_speed=300
+
         xray = create_photon(xray_source.pos+vector(xray_source.length/2,0,0))
+
         if button_box_list[1].color == color.green: #PE is on
+
+            #move the photon to the interaction site -jc
             move_objects([xray], [vector(1,0,0)], [PE_scatterElectron.pos+vector(50,0,0)], 2) #added extra 50 to ending position along to get closer to scattered
+            
+            #hide old photon -jc
             xray.visible = False
-            move_objects([PE_scatterElectron], [vector(1,-0.3,0)], [vector(scene.width*(1000/1024),0,0)], 2)    
+
+            #animate photon leaving the atom -jc
+            move_objects([PE_scatterElectron], [vector(1,-0.3,0)], [vector(scene.width*(1000/1024),0,0)], 2)
+
+            #create photon emmited by the high orbital electron as it falls -jc
             xray=create_photon(vector(-10,20,0)) #This origin puts pulse in right place
+
+            #animate the high orbital electron moving to the inner orbital -jc
             move_objects([xray, PE_dropElectron], [vector(1,0.2,0), PE_scatterElectron.pos-PE_dropElectron.pos-vector(0,750,0)], [vector(scene.width*(300/1024),0,0), PE_scatterElectronLoc], 2) #Secondary X-ray doesn't go far
+            
+            #hide used objects -jc
             xray.visible = False
             my_secondary_abs_lbl.visible=True
             my_secondary_abs_lbl2.visible=True
+
         sleep(0.1)
+
         if button_box_list[2].color == color.green:
+
+            #create a new start posistion if the PE simulation is still selected -jc
             xray_start = xray_source.pos + vector(xray_source.length/2, 0, 0)
             direction_to_electron = hat(compton_electron.pos - xray_start)
 
             if direction_to_electron.y < 0:
                 direction_to_electron.y += 0.1
 
+            #set up new velocity and final stopping point -jc
             scattered_direction = vector(direction_to_electron.x, -direction_to_electron.y, 0)
             adjusted_end = compton_electron.pos + vector(61.25 + x_corr, 0, 0)
 
+            #move until the photon is at the calculated ending x-value -jc
             move_objects([xray], [direction_to_electron], [adjusted_end], 2)
             move_objects([xray, compton_electron], [scattered_direction, vector(1, electron_y, 0)],
                          [vector(scene.width*(1000/1024),0,0), vector(scene.width*(1000/1024),0,0)], 2)
-                         
-            
-        if button_box_list[3].color == color.green: #Trans is on
+
+
+        #transmission sim
+        if button_box_list[3].color == color.green: #Trans is on -jc
+
+            #select a random number -jc
             rand2=random()
+
+            #50/50 of photon going up/down -jc
             if rand2>=0.5:
+
                 rand2=0.25*rand2
+
             else:
+
                 rand2=-0.25*rand2
+            
+            #move photon to scene end in the randomised direction
             move_objects([xray], [vector(1,rand2,0)], [vector(scene.width*(1000/1024),0,0)], 2)
+
+        #make photon invisible after motion stops -jc
         xray.visible = False
+
+        #during the photoelectric effect this is responsable for creating the explosion sticker and "adsorbed quickly" -jc
         if my_secondary_abs_lbl.visible==True:
+
             sleep(2)
             my_secondary_abs_lbl.visible=False
             my_secondary_abs_lbl2.visible=False
+        
+        #stop the simulation and reset current state -jc
         button_box_list[0].color = vector(0.7,0.7,0.7)
         control_panel.bind("mousedown", pe_but)
         control_panel.bind("mousedown", cs_but)
