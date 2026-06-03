@@ -1,3 +1,4 @@
+Web VPython 3.2
 from vpython import *
 #Web VPython 3.2
 from vpython import *
@@ -92,7 +93,17 @@ remember_m_index = 0
 #Objects
 
 # compton text
-lbl_compton = label(pos=vector(0, scene.height/2 - 70,0), text="Compton Electron", font="helvetica", box=False, canvas=scene, color=vec(0, 0, 0), height=text_size, visible=False, opacity=0)
+lbl_compton = label(
+    pos=vector(0, scene.height/2 - 70,0), 
+    text="Compton Electron", 
+    font="helvetica", 
+    box=False, 
+    canvas=scene, 
+    color=vec(0, 0, 0), 
+    height=text_size, 
+    visible=False, 
+    opacity=0
+    )
 
 
 #this is the button at the upper middle portion of the screen that takes you to the "atomic" view -jc
@@ -108,7 +119,7 @@ lbl_start1 = label(
     opacity=0
     )
 
-# this is the button that starts the animation -jc
+# this is the button that returns to target view-jc
 lbl_start2 = label(
     pos = vector(0,
     scene.height/2,0),
@@ -958,7 +969,7 @@ def switchView():
                 detector_box.visible = False
                 detector_label.visible = False
                 lbl_start2.visible = True
-                lbl_compton.visible = True
+                lbl_compton.visible = False
                 probability_box.visible = False
                 my_water_lbl.visible = False
                 my_bone_lbl.visible = False
@@ -1279,6 +1290,7 @@ def pe_but():
         PE_scatterElectron.opacity = 1
         PE_dropElectron.opacity = 1
         PE_dropElectron.visible = True
+
         my_error_lbl.visible = False
         compton_electron.visible = False
         my_PE_atomic.visible = True
@@ -1428,7 +1440,7 @@ while True:
 
         #set defaults for atomic view
         started_atomic = True
-        animation_speed=300
+        animation_speed = 300
 
         xray = create_photon(xray_source.pos+vector(xray_source.length/2,0,0))
 
