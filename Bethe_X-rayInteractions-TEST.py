@@ -1440,7 +1440,7 @@ while True:
 
         #set defaults for atomic view
         started_atomic = True
-        animation_speed = 300
+        animation_speed = speed_slider.value
 
         xray = create_photon(xray_source.pos+vector(xray_source.length/2,0,0))
 
