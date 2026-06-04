@@ -935,10 +935,23 @@ def switchView():
             my_error2_lbl.visible = False
             button_box_list[0].color = vector(0.7,0.7,0.7)
 
+            #show buttons for different simulation types in atomic view -jc
+            for i in [1,2,3]:
+                button_box_list[i].visible = True
+                button_icon_list[i].visible = True
+                button_text_list[i].visible = True
+
             if started:
                 xray.visible = False #clicking the start/stop button while the program is running stops the program -jc
 
             if is_atomic:
+
+                #Hide buttons that no longer have a use -jc
+                for i in [1,2,3]:
+                    button_box_list[i].visible = False
+                    button_icon_list[i].visible = False
+                    button_text_list[i].visible = False
+                
 
                 for i in range(0,3):
                     my_target_lbl_list[i].visible = False
@@ -1183,6 +1196,10 @@ def create_buttons(chosen_canvas, text_list, icon_list): #Positioning buttons un
 
 #sets up images for the control pannel -jc
 create_buttons(control_panel, ['Play/Pause', 'PE', 'Compton', 'Transmitted'], ['⏯','⚛️','📈','📡'])
+for i in [1,2,3]:
+        button_box_list[i].visible = False
+        button_icon_list[i].visible = False
+        button_text_list[i].visible = False
 
 loc_b=vector(0,0,0)
 
