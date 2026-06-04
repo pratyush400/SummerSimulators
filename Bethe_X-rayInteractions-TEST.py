@@ -991,9 +991,9 @@ def switchView():
 
 
                 for i in [1,2,3]:
-                    button_box_list[i].visible = True
-                    button_icon_list[i].visible = True
-                    button_text_list[i].visible = True
+                    button_box_list[i].visible = False
+                    button_icon_list[i].visible = False
+                    button_text_list[i].visible = False
                 
 
                 #re-enable the sliders and menu
