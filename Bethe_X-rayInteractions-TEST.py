@@ -52,7 +52,7 @@ PE_dropElectronLoc = vector((-104/1025)*scene.width,(10/513)*scene.height,0)
 PE_scatterElectronLoc = vector((-70/1025)*scene.width,(-31/513)*scene.height,0)
 
 # SETTING UP COMPTON ELECTRON RANDOMNESS
-# seeting comptom election starting positions
+# seeting compton election starting positions
 bottom_left = vector((-63/1025)*scene.width,(-153/513)*scene.height,0)
 top_left = vector((-63/1470)*scene.width,(145/590)*scene.height,0)
 bottom_right = vector((40/1000)*scene.width,(-160/500)*scene.height,0)
