@@ -628,7 +628,7 @@ lbl_start=label(
     canvas=scene, 
     color=vector(0,0.36,0.39), 
     height=15, 
-    visible=True, 
+    visible=False, 
     opacity=0
     )
 
