@@ -1265,6 +1265,19 @@ def Run():
                 tr_tot_lbl.visible=False
                 started_atomic = True
 
+                #create a if statment that prevents swiching animation while one is active -jc
+                if button_box_list[0].color == color.green:
+                    control_panel.bind("mousedown", Run)
+                    control_panel.unbind("mousedown", pe_but)
+                    control_panel.unbind("mousedown", cs_but)
+                    control_panel.unbind("mousedown", trans_but)
+                # else:
+                #     control_panel.bind("mousedown", Run)
+                #     control_panel.unbind("mousedown", pe_but)
+                #     control_panel.unbind("mousedown", cs_but)
+                #     control_panel.unbind("mousedown", trans_but)
+                    
+
                 #Make sure that the canvas is set up properly if this isnt the first time mechinistic view has been set up -jc
                 if has_run:   #Check
                     resetAtomic()
