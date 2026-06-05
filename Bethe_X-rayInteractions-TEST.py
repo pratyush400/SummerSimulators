@@ -95,7 +95,7 @@ remember_m_index = 0
 # compton text
 lbl_compton = label(
     pos=vector(0, scene.height/2 - 70,0), 
-    text="Compton Electron", 
+    text="Compton Scattering", 
     font="helvetica", 
     box=False, 
     canvas=scene, 
