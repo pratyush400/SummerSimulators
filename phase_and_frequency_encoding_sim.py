@@ -35,23 +35,22 @@ control_panel = canvas(
 #create an empty list to track all the arrow assets
 
 #create a class that contains all infromation needed for rotating the "magnetic pointers" at different speeds
-class magnetic_pointer();
+class magnetic_pointer:
 
-    def __init__():
-        self.posistion = #take input for posistion
+    def __init__(self, posistion):
+        self.posistion = posistion
 
         #set up the circle and arrow for the spinner/posistion
-        self.components = [
-            sphere(
+        self.body = sphere(
                 canvas = animation_scene,
-                pos = vector(0,0,0),
+                pos = self.posistion,
                 radius = 1,
                 color = color.red,
-                visible = False
-            ),
-            arrow(
+                visible = True
+            )
+        self.pointer = arrow(
                 canvas = animation_scene,
-                pos = vector(0, 0, 0),
+                pos = self.posistion,
                 axis = vector(0, 1, 0),
                 shaftwidth =.2,
                 headwidth= .4,
@@ -60,8 +59,7 @@ class magnetic_pointer();
                 round = True,
                 visible = True
             )
-        ]
-        
+
         self.magnetic_field = 0
 
 
@@ -83,42 +81,42 @@ class magnetic_pointer();
 
         #find new theta and apply changes
         theta = theta + angular_velocity
-        self.components[2].axis = vector(
+        self.pointer.axis = vector(
             cos(theta * raidus),
             sin(theta * raidus),
             0
         )
 
-test_object_animation_space = sphere(
-    canvas = animation_scene,
-    pos = vector(0,0,0),
-    radius = 1,
-    color = color.red,
-    visible = False
-    )
+# test_object_animation_space = sphere(
+#     canvas = animation_scene,
+#     pos = vector(0,0,0),
+#     radius = 1,
+#     color = color.red,
+#     visible = False
+#     )
 
-test_arrow = arrow(
-    canvas = animation_scene,
-    pos = vector(0, 0, 0),
-    axis = vector(0, 1, 0),
-    shaftwidth =.2,
-    headwidth= .4,
-    headlength = .15,
-    color = color.blue,
-    round = True,
-    visible = True
-)
+# test_arrow = arrow(
+#     canvas = animation_scene,
+#     pos = vector(0, 0, 0),
+#     axis = vector(0, 1, 0),
+#     shaftwidth =.2,
+#     headwidth= .4,
+#     headlength = .15,
+#     color = color.blue,
+#     round = True,
+#     visible = True
+#)
 
 #----------------------------Create Objects for control pannel----------------------------#
 
     
-test_object_ctrl_panel = sphere(
-    canvas = control_panel,
-    pos = vector(0,0,0),
-    radius = 1,
-    color = color.red,
-    visible = False
-    )
+# test_object_ctrl_panel = sphere(
+#     canvas = control_panel,
+#     pos = vector(0,0,0),
+#     radius = 1,
+#     color = color.red,
+#     visible = False
+#     )
 
 
 #----------------------------Create functions for animation pannel----------------------------#
@@ -129,3 +127,18 @@ test_object_ctrl_panel = sphere(
 
 
 #----------------------------Create functions for control pannel----------------------------#
+
+
+
+
+
+#----------------------------Basic Running loop behavior----------------------------#
+
+
+def Run():
+    
+    
+    #tracks the mouse's posistion in the control pannel -jc
+    loc_b = control_panel.mouse.pos
+
+    test_pointer = magnetic_pointer(vector(0,0,0))
