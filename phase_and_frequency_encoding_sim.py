@@ -44,7 +44,7 @@ class magnetic_pointer:
         self.body = sphere(
                 canvas = animation_scene,
                 pos = self.posistion,
-                radius = 1,
+                radius = .5,
                 color = color.red,
                 visible = True
             )
@@ -142,3 +142,8 @@ def Run():
     loc_b = control_panel.mouse.pos
 
     test_pointer = magnetic_pointer(vector(0,0,0))
+
+
+#----------------------------Start the sim----------------------------#
+
+Run()
