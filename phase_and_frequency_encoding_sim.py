@@ -5,6 +5,10 @@ from vpython import *
 from random import choice
 
 
+#----------------------------Declare Globals----------------------------#
+
+pointer_list = []
+
 #----------------------------Create Scenes----------------------------#
 
 animation_scene = canvas(
@@ -49,7 +53,7 @@ class magnetic_pointer:
                 radius = .5,
                 color = color.red,
                 visible = True
-            )
+        )
         self.pointer = arrow(
                 canvas = animation_scene,
                 pos = self.posistion,
@@ -60,9 +64,11 @@ class magnetic_pointer:
                 color = color.blue,
                 round = True,
                 visible = True
-            )
+        )
 
         self.magnetic_field = 0
+
+        pointer_list.append(self)
 
 
     def calculate_magnetic_field(self):
@@ -72,22 +78,23 @@ class magnetic_pointer:
 
     #rotate for 1 ms
     def rotate_self(self):
+        print("working")
 
-        #calculate theta initial
-        unit_vector = target.x_pos / target.raidus
-        theta = invcos(unit_vector)
+        # #calculate theta initial
+        # unit_vector = target.x_pos / target.raidus
+        # theta = acos(unit_vector)
 
-        #calculate b_field
-        B = self.calculate_magnetic_field(self)
-        angular_velocity = B * rotation_coefficent
+        # #calculate b_field
+        # B = self.calculate_magnetic_field(self)
+        # angular_velocity = B * rotation_coefficent
 
-        #find new theta and apply changes
-        theta = theta + angular_velocity
-        self.pointer.axis = vector(
-            cos(theta * raidus),
-            sin(theta * raidus),
-            0
-        )
+        # #find new theta and rotate to it
+        # theta = theta + angular_velocity
+        # self.pointer.axis = vector(
+        #     cos(theta * raidus),
+        #     sin(theta * raidus),
+        #     0
+        # )
 
 # test_object_animation_space = sphere(
 #     canvas = animation_scene,
@@ -123,6 +130,11 @@ class magnetic_pointer:
 
 #----------------------------Create functions for animation pannel----------------------------#
 
+def rotate_all():
+
+    for i in len(pointer_list):
+
+        pointer_list[i].rotate_self()
 
 
 
@@ -140,8 +152,9 @@ def create_button(chosen_canvas, text, icon):
         height = chosen_canvas.height * .2,
         width = 1,
         color = vec(0.5,0.5,0.5),
+
         shininess = 0,
-        opacity = 0.3
+        opacity = 0.3,
     )
 
     #create the button icon/image
@@ -167,6 +180,11 @@ def create_button(chosen_canvas, text, icon):
         opacity = 0
     )
 
+def start_button_clicked(evt):
+
+    rotate_all()
+
+control_panel.bind('click', start_button_clicked)
 
 
 
@@ -188,7 +206,9 @@ def Run():
     create_button(control_panel, 'Play/Pause', '⏯')
 
     #tracks the mouse's posistion in the control pannel -jc
-    loc_b = control_panel.mouse.pos
+    mouse_location = control_panel.mouse.pos
+
+
 
     while True:
         rate(60)
