@@ -11,13 +11,23 @@ scene.lights=[]
 distant_light(direction=vector( 0.22, 0.44, 0.88), color=color.white)
 distant_light(direction=vector(-0.88, -0.22, -0.44), color=color.white)
 #Moved down 100 affects below
+browser_window = window
 my_bookImage = box(pos=vector(0,-100,0), length=scene.width, height=scene.height, texture="https://i.imgur.com/ipbI9jA.jpeg", shininess=0, visible = False, color=color.white)
+
+#Text to speech
+
+YOUR_DOCUMENT_TEXT = """
+Paste your text here. 
+It can span multiple lines and paragraphs.
+For example: Hello! This text is stored directly inside the code.
+The browser will read it perfectly without needing any external file.
+"""
 
 #Variables
 atoms_loc = scene.width/2
 animation_speed=1000
 remember_speed = animation_speed
-E = 20 #Energy in keV
+E = 20 #Energy in keVT
 Z = 7.4 #Starting atomic number
 theta = pi/15
 text_size=15 
@@ -30,7 +40,14 @@ has_run = False #Set to true after a full atomic/mechanistic run. Calls reset_at
 remember_has_run=has_run
 PE_dropElectronLoc = vector((-104/1025)*scene.width,(10/513)*scene.height,0)
 PE_scatterElectronLoc = vector((-70/1025)*scene.width,(-31/513)*scene.height,0)
-
+PE_MElectronLoc = vector(-130, 40, 0)   # M shell
+PE_LElectronLoc = vector(-115, 25, 0)   # L shell
+PE_MElectron = sphere(
+    pos=PE_MElectronLoc,
+    radius=8,
+    color=color.orange,
+    visible=False
+)
 # SETTING UP COMPTON ELECTRON RANDOMNESS 
 # seeting comptom election positions
 bottom_left = vector((-63/1025)*scene.width,(-153/513)*scene.height,0)
@@ -49,6 +66,26 @@ animation_choice = choice(list(COMPTON_ANIMATION.keys()))
 compton_electronLoc, url, x_corr, electron_y = COMPTON_ANIMATION[animation_choice]
 
 
+# # SETTING UP PE Electron randomness
+# # seeting PE election positions
+# left_br = vector((-63/1025)*scene.width,(-153/513)*scene.height,0)
+# left_left = vector((45/1025)*scene.width,(140/590)*scene.height,0)
+# # t_left = vector((-63/1470)*scene.width,(145/590)*scene.height,0)
+# # b_right = vector((40/1000)*scene.width,(-160/500)*scene.height,0)
+# # t_right = vector((45/1000)*scene.width,(140/590)*scene.height,0)
+
+# lbr_url = "https://medicalimaging.watzekdi.net/images/Xray_images/Activity2-Interactions/PE_nolabel_1_3.png"
+# ll_url = "https://medicalimaging.watzekdi.net/images/Xray_images/Activity2-Interactions/PE_nolabel_1_1.png"
+# # tl_url = "https://medicalimaging.watzekdi.net/images/Xray_images/Activity2-Interactions/electron_TL.png"
+# # br_url = "https://medicalimaging.watzekdi.net/images/Xray_images/Activity2-Interactions/electron_BR.png"
+# # tr_url = "https://medicalimaging.watzekdi.net/images/Xray_images/Activity2-Interactions/electron_TR.png"
+
+# PE_ANIMATION = {1: [left_left, ll_url,-20, -0.2], 2: [left_br, lbr_url, 40, 0.2]}
+
+# animation_choice2 = choice(list(PE_ANIMATION.keys()))
+# PE_LElectronLoc2, url2, x_corr2, electron_y2 = PE_ANIMATION[animation_choice2]
+
+
 
 pulse_list=[vector(0,34.625,0),vector(0.125,34.625,0),vector(0.25,34.5,0),vector(0.375,34.375,0),vector(0.5,34.25,0),vector(0.625,34.125,0),vector(0.75,34,0),vector(0.875,33.75,0),vector(1,33.625,0),vector(1.125,33.25,0),vector(1.25,33.125,0),vector(1.375,32.875,0),vector(1.5,32.75,0),vector(1.625,32.625,0),vector(1.75,32.5,0),vector(1.875,32.375,0),vector(2,32.375,0),vector(2.125,32.25,0),vector(2.25,32.375,0),vector(2.375,32.375,0),vector(2.5,32.5,0),vector(2.625,32.625,0),vector(2.75,32.75,0),vector(2.875,32.875,0),vector(3,33,0),vector(3.125,33.25,0),vector(3.25,33.625,0),vector(3.375,34,0),vector(3.5,34.375,0),vector(3.625,35,0),vector(3.75,35.5,0),vector(3.875,35.875,0),vector(4,36.375,0),vector(4.125,36.875,0),vector(4.25,37.125,0),vector(4.375,37.5,0),vector(4.5,37.875,0),vector(4.625,38.25,0),vector(4.75,38.5,0),vector(4.875,38.75,0),vector(5,38.875,0),vector(5.125,39,0),vector(5.25,39.125,0),vector(5.375,39.25,0),vector(5.5,39.375,0),vector(5.625,39.375,0),vector(5.75,39.5,0),vector(5.875,39.5,0),vector(6,39.5,0),vector(6.125,39.5,0),vector(6.25,39.375,0),vector(6.375,39.375,0),vector(6.5,39.25,0),vector(6.625,39.125,0),vector(6.75,39,0),vector(6.875,38.875,0),vector(7,38.75,0),vector(7.125,38.5,0),vector(7.25,38.125,0),vector(7.375,37.875,0),vector(7.5,37.625,0),vector(7.625,37.125,0),vector(7.75,36.625,0),vector(7.875,36.125,0),vector(8,35.625,0),vector(8.125,34.75,0),vector(8.25,34,0),vector(8.375,32.875,0),vector(8.5,31.75,0),vector(8.625,30.5,0),vector(8.75,29.25,0),vector(8.875,28.25,0),vector(9,27.375,0),vector(9.125,26.25,0),vector(9.25,25.375,0),vector(9.375,24.625,0),vector(9.5,23.875,0),vector(9.625,23.25,0),vector(9.75,22.625,0),vector(9.875,22.25,0),vector(10,21.875,0),vector(10.125,21.5,0),vector(10.25,21.375,0),vector(10.375,21.25,0),vector(10.5,21.25,0),vector(10.625,21.25,0),vector(10.75,21.25,0),vector(10.875,21.375,0),vector(11,21.625,0),vector(11.125,21.875,0),vector(11.25,22.5,0),vector(11.375,22.875,0),vector(11.5,23.375,0),vector(11.625,24.125,0),vector(11.75,24.875,0),vector(11.875,25.75,0),vector(12,26.5,0),vector(12.125,27.625,0),vector(12.25,28.75,0),vector(12.375,29.75,0),vector(12.5,30.75,0),vector(12.625,32.25,0),vector(12.75,33.75,0),vector(12.875,35,0),vector(13,36.25,0),vector(13.125,37.75,0),vector(13.25,39,0),vector(13.375,40,0),vector(13.5,41,0),vector(13.625,42.25,0),vector(13.75,43.25,0),vector(13.875,44,0),vector(14,44.75,0),vector(14.125,45.625,0),vector(14.25,46.25,0),vector(14.375,46.75,0),vector(14.5,47.125,0),vector(14.625,47.625,0),vector(14.75,47.875,0),vector(14.875,48,0),vector(15,48.125,0),vector(15.125,48.25,0),vector(15.25,48.125,0),vector(15.375,48,0),vector(15.5,47.875,0),vector(15.625,47.75,0),vector(15.75,47.375,0),vector(15.875,47,0),vector(16,46.625,0),vector(16.125,45.875,0),vector(16.25,45.25,0),vector(16.375,44.5,0),vector(16.5,43.75,0),vector(16.625,42.75,0),vector(16.75,41.75,0),vector(16.875,40.75,0),vector(17,39.625,0),vector(17.125,38,0),vector(17.25,35.875,0),vector(17.375,34.375,0),vector(17.5,32.625,0),vector(17.625,29.5,0),vector(17.75,26.625,0),vector(17.875,24.25,0),vector(18,21.75,0),vector(18.125,18.5,0),vector(18.25,15.875,0),vector(18.375,14,0),vector(18.5,12,0),vector(18.625,9.75,0),vector(18.75,8,0),vector(18.875,6.625,0),vector(19,5.375,0),vector(19.125,4,0),vector(19.25,2.875,0),vector(19.375,2.5,0),vector(19.5,2,0),vector(19.625,1.375,0),vector(19.75,1.25,0),vector(19.875,1.25,0),vector(20,1.625,0),vector(20.125,2.125,0),vector(20.25,2.75,0),vector(20.375,3.5,0),vector(20.5,4.375,0),vector(20.625,5.75,0),vector(20.75,7.375,0),vector(20.875,8.875,0),vector(21,10.375,0),vector(21.125,12.625,0),vector(21.25,15,0),vector(21.375,17.125,0),vector(21.5,19.5,0),vector(21.625,22.625,0),vector(21.75,25.875,0),vector(21.875,28.75,0),vector(22,32.125,0),vector(22.125,36.5,0),vector(22.25,40.5,0),vector(22.375,44.125,0),vector(22.5,48,0),vector(22.625,52.25,0),vector(22.75,56,0),vector(22.875,58.875,0),vector(23,61.75,0),vector(23.125,64.875,0),vector(23.25,67.5,0),vector(23.375,69.375,0),vector(23.5,71.375,0),vector(23.625,73.375,0),vector(23.75,75,0),vector(23.875,76.125,0),vector(24,76.875,0),vector(24.125,77.75,0),vector(24.25,78.125,0),vector(24.375,78.25,0),vector(24.5,78.125,0),vector(24.625,77.75,0),vector(24.75,76.875,0),vector(24.875,76.125,0),vector(25,75,0),vector(25.125,73.375,0),vector(25.25,71.375,0),vector(25.375,69.375,0),vector(25.5,67.5,0),vector(25.625,64.875,0),vector(25.75,61.75,0),vector(25.875,58.875,0),vector(26,56,0),vector(26.125,52.25,0),vector(26.25,48,0),vector(26.375,44.125,0),vector(26.5,40.5,0),vector(26.625,36.5,0),vector(26.75,32.125,0),vector(26.875,28.75,0),vector(27,25.875,0),vector(27.125,22.625,0),vector(27.25,19.5,0),vector(27.375,17.125,0),vector(27.5,15,0),vector(27.625,12.625,0),vector(27.75,10.375,0),vector(27.875,8.875,0),vector(28,7.375,0),vector(28.125,5.75,0),vector(28.25,4.375,0),vector(28.375,3.5,0),vector(28.5,2.75,0),vector(28.625,2.125,0),vector(28.75,1.625,0),vector(28.875,1.25,0),vector(29,1.25,0),vector(29.125,1.375,0),vector(29.25,2,0),vector(29.375,2.5,0),vector(29.5,2.875,0),vector(29.625,4,0),vector(29.75,5.375,0),vector(29.875,6.625,0),vector(30,8,0),vector(30.125,9.75,0),vector(30.25,12,0),vector(30.375,14,0),vector(30.5,15.875,0),vector(30.625,18.5,0),vector(30.75,21.75,0),vector(30.875,24.25,0),vector(31,26.625,0),vector(31.125,29.5,0),vector(31.25,32.625,0),vector(31.375,34.375,0),vector(31.5,35.875,0),vector(31.625,38,0),vector(31.75,39.625,0),vector(31.875,40.75,0),vector(32,41.75,0),vector(32.125,42.75,0),vector(32.25,43.75,0),vector(32.375,44.5,0),vector(32.5,45.25,0),vector(32.625,45.875,0),vector(32.75,46.625,0),vector(32.875,47,0),vector(33,47.375,0),vector(33.125,47.75,0),vector(33.25,47.875,0),vector(33.375,48,0),vector(33.5,48.125,0),vector(33.625,48.25,0),vector(33.75,48.125,0),vector(33.875,48,0),vector(34,47.875,0),vector(34.125,47.625,0),vector(34.25,47.125,0),vector(34.375,46.75,0),vector(34.5,46.25,0),vector(34.625,45.625,0),vector(34.75,44.75,0),vector(34.875,44,0),vector(35,43.25,0),vector(35.125,42.25,0),vector(35.25,41,0),vector(35.375,40,0),vector(35.5,39,0),vector(35.625,37.75,0),vector(35.75,36.25,0),vector(35.875,35,0),vector(36,33.75,0),vector(36.125,32.25,0),vector(36.25,30.75,0),vector(36.375,29.75,0),vector(36.5,28.75,0),vector(36.625,27.625,0),vector(36.75,26.5,0),vector(36.875,25.75,0),vector(37,24.875,0),vector(37.125,24.125,0),vector(37.25,23.375,0),vector(37.375,22.875,0),vector(37.5,22.5,0),vector(37.625,21.875,0),vector(37.75,21.625,0),vector(37.875,21.375,0),vector(38,21.25,0),vector(38.125,21.25,0),vector(38.25,21.25,0),vector(38.375,21.25,0),vector(38.5,21.375,0),vector(38.625,21.5,0),vector(38.75,21.875,0),vector(38.875,22.25,0),vector(39,22.625,0),vector(39.125,23.25,0),vector(39.25,23.875,0),vector(39.375,24.625,0),vector(39.5,25.375,0),vector(39.625,26.25,0),vector(39.75,27.375,0),vector(39.875,28.25,0),vector(40,29.25,0),vector(40.125,30.5,0),vector(40.25,31.75,0),vector(40.375,32.875,0),vector(40.5,34,0),vector(40.625,34.75,0),vector(40.75,35.625,0),vector(40.875,36.125,0),vector(41,36.625,0),vector(41.125,37.125,0),vector(41.25,37.625,0),vector(41.375,37.875,0),vector(41.5,38.125,0),vector(41.625,38.5,0),vector(41.75,38.75,0),vector(41.875,38.875,0),vector(42,39,0),vector(42.125,39.125,0),vector(42.25,39.25,0),vector(42.375,39.375,0),vector(42.5,39.375,0),vector(42.625,39.5,0),vector(42.75,39.5,0),vector(42.875,39.5,0),vector(43,39.5,0),vector(43.125,39.375,0),vector(43.25,39.375,0),vector(43.375,39.25,0),vector(43.5,39.125,0),vector(43.625,39,0),vector(43.75,38.875,0),vector(43.875,38.75,0),vector(44,38.5,0),vector(44.125,38.25,0),vector(44.25,37.875,0),vector(44.375,37.5,0),vector(44.5,37.125,0),vector(44.625,36.875,0),vector(44.75,36.375,0),vector(44.875,35.875,0),vector(45,35.5,0),vector(45.125,35,0),vector(45.25,34.375,0),vector(45.375,34,0),vector(45.5,33.625,0),vector(45.625,33.25,0),vector(45.75,33,0),vector(45.875,32.875,0),vector(46,32.75,0),vector(46.125,32.625,0),vector(46.25,32.5,0),vector(46.375,32.375,0),vector(46.5,32.375,0),vector(46.625,32.25,0),vector(46.75,32.375,0),vector(46.875,32.375,0),vector(47,32.5,0),vector(47.125,32.625,0),vector(47.25,32.75,0),vector(47.375,32.875,0),vector(47.5,33.125,0),vector(47.625,33.25,0),vector(47.75,33.625,0),vector(47.875,33.75,0),vector(48,34,0),vector(48.125,34.125,0),vector(48.25,34.25,0),vector(48.375,34.375,0),vector(48.5,34.5,0),vector(48.625,34.625,0),vector(48.75,34.625,0)]
 #test_photon=curve(pos=pulse_list, color=vec(0,0.5,0), radius=1, canvas=scene, origin=vector(-110,-40,0))
@@ -63,12 +100,14 @@ remember_m_index=0
 #Objects
 
 # compton text 
-lbl_compton=label(pos=vector(0, scene.height/2 - 70, 0),text="Compton Electron", font="helvetica", box=False,canvas=scene, color=vec(0, 0, 0), height=text_size,visible=False, opacity=0)
+lbl_compton=label(pos=vector(0, scene.height/2 - 70, 0),text="Compton Scattering", font="helvetica", box=False,canvas=scene, color=vec(0, 0, 0), height=text_size,visible=False, opacity=0)
 
 
 #Photoelectric text
 lbl_PE=label(pos=vector(0, scene.height/2 - 70, 0),text="Photoelectric Effect", font="helvetica", box=False,canvas=scene, color=color.black, height=text_size,visible=False, opacity=0)
 
+#Transmission text
+lbl_TR =label(pos=vector(0, scene.height/2 - 70, 0),text="Transmission", font="helvetica", box=False,canvas=scene, color=vec(0, 0, 0), height=text_size,visible=False, opacity=0)
 
 lbl_start1=label(pos=vector(0, scene.height/2,0), text="Click for mechanistic view!", font="helvetica", box=True, canvas=scene, color=vec(0.000, 0.360, 0.390), height=text_size, visible=True, opacity=0)
 lbl_start2=label(pos=vector(0, scene.height/2,0), text="Return to target view!", font="helvetica", box=True, canvas=scene, color=vec(0.000, 0.360, 0.390), height=text_size, visible=False, opacity=0)
@@ -76,8 +115,8 @@ medium_box = box(pos=vector(atoms_loc/2,-2.5*text_size,0), height=scene.height/1
 medium_label = text(pos=medium_box.pos + vector(-20,(medium_box.height/2.3),-50), text='Sample', font="sans", box=False, canvas=scene, axis=vector(5,0.1,10), color=vec(0.622, 0.779, 0.847), height=1.5*text_size, visible=False)
 #BAS Source is a curve and box is invisible
 my_CS_atomic= box(pos=vector(0,-2*text_size,0), height=scene.width/2, length=scene.width/2, width=1, texture=url, color=color.white, opacity=1, visible=False)
-my_PE_atomic= box(pos=vector(0,-2*text_size,0), height=scene.width/2, length=scene.width/2, width=1, texture="https://i.imgur.com/Pc2apHh.png", color=color.white, opacity=1, visible=False)
-my_trans_atomic= box(pos=vector(0,-2*text_size,0), height=scene.width/2, length=scene.width/2, width=1, texture="https://i.imgur.com/rhxqQqy.png", color=color.black, opacity=1, visible=False)
+my_PE_atomic= box(pos=vector(0,-2*text_size,0), height=scene.width/2, length=scene.width/2, width=1, texture="https://medicalimaging.watzekdi.net/images/Xray_images/Activity2-Interactions/PE_nolabel_1_1.png", color=color.white, opacity=1.5, visible=False)
+my_trans_atomic= box(pos=vector(0,-2*text_size,0), height=scene.width/2, length=scene.width/2, width=1, texture="https://medicalimaging.watzekdi.net/images/Xray_images/Activity2-Interactions/Transmission.png", color=color.white, opacity=1, visible=False)
 my_mech_atomic_list=[my_PE_atomic, my_CS_atomic, my_trans_atomic]
 probability_list=[vector(350,-50,0), vector(750,-50,0), vector(750,50,0), vector(350,50,0), vector(350,-50,0)]
 probability_box = curve(pos=probability_list, color=color.black, radius=2, visible=True, origin=vector(0,-50,0))
@@ -138,6 +177,25 @@ scaling_sphere2=sphere(pos=vector(0,-1*atomic_label.pos.y+7*text_size,0), opacit
 title = label(pos=vector(0,-1*atomic_label.pos.y+8*text_size,0), text='Explore Interactions Between Diagnostic X-rays and Matter', font='helvetica', height=1.5*text_size, box=False, visible=True, color=color.black, opacity=0)
 lbl_start=label(pos=vector(0,-330,0), text="Start with Activities (link at top)!", font="helvetica", box=True, canvas=scene, color=vector(0,0.36,0.39), height=15, visible=True, opacity=0)
 
+# # 2. Text-to-speech execution engine
+# def speak_text(text_to_say):
+#     if hasattr(browser_window, 'speechSynthesis'):
+#         # Create the audio object
+#         utterance = browser_window.SpeechSynthesisUtterance(text_to_say)
+        
+#         # Speech settings
+#         utterance.rate = 1.0   # Speed (0.1 to 10)
+#         utterance.pitch = 1.0  # Pitch (0 to 2)
+        
+#         # Read the text out loud
+#         browser_window.speechSynthesis.speak(utterance)
+#     else:
+#         print("Text-to-speech is not supported in this browser.")
+
+# # 3. Interactive button callback
+# def handle_button_click():
+#     speak_text(YOUR_DOCUMENT_TEXT)
+
 # Hyperlinks 
 s = '''<font size=4> <font>'''
 l= '''<font size=4> <font>'''
@@ -160,12 +218,18 @@ def link4(url, d):
     v += "<a href='https://medicalimaging.watzekdi.net/images/Xray_images/Activity2-Interactions/%20Information-Interactions.png" + "' target='_blank'>" + url + "</a>"
     v += d
     
+
+
 link4("Information", "&nbsp &nbsp &nbsp")
 scene.append_to_title(v)
 link3("Background", "&nbsp &nbsp &nbsp")
 scene.append_to_title(q)
 link2("Activities", "&nbsp &nbsp &nbsp")
 scene.append_to_title(l)
+scene.append_to_title("<br><br>")
+
+# # 3. Create the widget natively. This directly passes browser authorization so speech triggers instantly!
+# speech_button = button(bind=handle_button_click, text="Click to Speak")
 
 # Functions
 
@@ -309,6 +373,14 @@ def randomize_compton_position():
     my_CS_atomic.texture = url
     my_CS_atomic.visible = True
 
+# def randomize_PE_position():
+#     global PE_LElectronLoc2, url2, x_corr2, electron_y2
+#     animation_choice2 = choice(list(PE_ANIMATION.keys()))
+#     PE_LElectronLoc2, url2, x_corr2, electron_y2 = PE_ANIMATION[animation_choice2]
+#     PE_scatterElectron.pos = PE_dropElectronLoc
+#     my_PE_atomic.texture = url
+#     my_PE_atomic.visible = True
+
 
 def resetAtomic():
     global has_run, started, PE_scatteredElectron, PE_dropElectron, compton_electron
@@ -367,12 +439,13 @@ def switchView():
                 detector_label.visible = False
                 lbl_start2.visible=True     
                 lbl_compton.visible=False
+                lbl_TR.visible=False
                 probability_box.visible=False
                 my_water_lbl.visible=False
                 my_bone_lbl.visible=False
                 my_lead_lbl.visible=False
                 my_prob_lbl.visible=True
-                lbl_PE.visible=True
+                lbl_PE.visible=False
                 my_TRtot_lbl.visible=False
                 my_CStot_lbl.visible=False
             else:
@@ -406,6 +479,7 @@ def switchView():
                 probability_box.visible=True
                 my_prob_lbl.visible=True
                 lbl_PE.visible=False
+                lbl_TR.visible=False
                 my_TRtot_lbl.visible=True
                 lbl_compton.visible=False
                 my_CStot_lbl.visible=True
@@ -487,7 +561,7 @@ def create_buttons(chosen_canvas, text_list, icon_list): #Positioning buttons un
         button_icon_list.append(label(pos=button_box_list[i].pos, text=icon_list[i], height=button_box_list[i].height/1.7, color=color.black, box=False, opacity=0))
         button_text_list.append(label(pos=button_box_list[i].pos-vector(0,button_box_list[i].height/2+text_size,0), text=text_list[i], height=text_size, color=color.black, box=False, opacity=0))
 
-create_buttons(control_panel, ['Play/Pause', 'PE', 'Compton', 'Transmitted'], ['⏯','⚛️','📈','📡'])
+create_buttons(control_panel, ['Play/Pause', 'PE', 'Compton', 'Transmission'], ['⏯','⚛️','📈','📡'])
 
 loc_b=vector(0,0,0)
 def Run():
@@ -544,6 +618,7 @@ def pe_but():
     global PE_scatterElectron, PE_dropElectron, compton_electron
     loc_b=control_panel.mouse.pos   
     if abs(loc_b.x-button_box_list[1].pos.x)<=button_box_list[0].length/2 and abs(loc_b.y-button_box_list[1].pos.y)<=button_box_list[0].height/2:
+        # randomize_PE_position()
         my_electrons_list[0].visible=True
         my_electrons_list[0].opacity=1
         my_electrons_list[1].opacity=1
@@ -559,6 +634,7 @@ def pe_but():
         my_PE_atomic.visible=True
         my_CS_atomic.visible=False
         lbl_compton.visible = False
+        lbl_TR.visible=False
         my_trans_atomic.visible=False
         pe_tot_lbl.visible=False
         cs_tot_lbl.visible=False
@@ -569,7 +645,7 @@ def pe_but():
         my_lead_lbl.visible=False
         my_prob_lbl.visible=False
         my_CStot_lbl.visible=False
-        lbl_PE.visible=False
+        lbl_PE.visible=True
         my_TRtot_lbl.visible=False
         bg_menu.disabled=True
         my_mech_lbl.visible=False
@@ -595,6 +671,7 @@ def cs_but():
         PE_dropElectron.visible=False
         my_CS_atomic.visible=True
         lbl_compton.visible = True
+        lbl_TR.visible=False
         my_PE_atomic.visible=False
         my_trans_atomic.visible=False
         my_error_lbl.visible=False
@@ -626,6 +703,7 @@ def trans_but(): #Make lead
         lbl_compton.visible = False
         my_PE_atomic.visible=False
         has_run=True
+        lbl_TR.visible=True
         pe_tot_lbl.visible=False
         cs_tot_lbl.visible=False
         tr_tot_lbl.visible=False
@@ -674,6 +752,12 @@ while True:
             xray=create_photon(vector(-10,20,0)) #This origin puts pulse in right place
             move_objects([xray, PE_dropElectron], [vector(1,0.2,0), PE_scatterElectron.pos-PE_dropElectron.pos-vector(0,750,0)], [vector(scene.width*(300/1024),0,0), PE_scatterElectronLoc], 2) #Secondary X-ray doesn't go far
             xray.visible = False
+            move_objects(
+    [PE_MElectron],
+    [PE_LElectronLoc - PE_MElectronLoc],
+    [PE_LElectronLoc],
+    2
+)
             my_secondary_abs_lbl.visible=True
             my_secondary_abs_lbl2.visible=True
         sleep(0.1)
