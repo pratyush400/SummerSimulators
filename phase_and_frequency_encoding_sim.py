@@ -80,14 +80,14 @@ class magnetic_pointer:
     def calculate_magnetic_field(self):
 
         #B = background_field + (x_pos * x_gradient) + (y_pos * x_gradient)
-        self.magnetic_field = 1
+        self.magnetic_field = 1 + (.1 * self.posistion.x) + (.1 * self.posistion.y)
         return self.magnetic_field
 
     #rotate for 1 ms
     def rotate_self(self):
 
-        #B = self/magnetic_field
-        angular_velocity = pi/180 #B*coefficent, add the real value later
+        B = self.calculate_magnetic_field()
+        angular_velocity = pi/180 * B
 
         self.theta = self.theta + angular_velocity
         self.pointer.axis = vector(
