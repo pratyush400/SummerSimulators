@@ -34,7 +34,7 @@ control_panel = canvas(
     userspin = False,
     userzoom = False,
     resizable = False
-    )
+    )   
 
 #----------------------------Create Objects for animation pannel----------------------------#
 
@@ -45,6 +45,8 @@ class magnetic_pointer:
 
     def __init__(self, posistion):
         self.posistion = posistion
+
+        self.theta = pi/2
 
         #set up the circle and arrow for the spinner/posistion
         self.body = sphere(
@@ -66,6 +68,8 @@ class magnetic_pointer:
                 visible = True
         )
 
+        self.magnitude = self.pointer.axis.mag  
+
         self.magnetic_field = 0
 
         pointer_list.append(self)
@@ -73,28 +77,22 @@ class magnetic_pointer:
 
     def calculate_magnetic_field(self):
 
-        B = background_field + (x_pos * x_gradient) + (y_pos * x_gradient)
-        self.magnetic_field = B
+        #B = background_field + (x_pos * x_gradient) + (y_pos * x_gradient)
+        self.magnetic_field = 1
+        return self.magnetic_field
 
     #rotate for 1 ms
     def rotate_self(self):
-        print("working")
 
-        # #calculate theta initial
-        # unit_vector = target.x_pos / target.raidus
-        # theta = acos(unit_vector)
+        #B = self/magnetic_field
+        angular_velocity = pi/180 #B*coefficent, add the real value later
 
-        # #calculate b_field
-        # B = self.calculate_magnetic_field(self)
-        # angular_velocity = B * rotation_coefficent
-
-        # #find new theta and rotate to it
-        # theta = theta + angular_velocity
-        # self.pointer.axis = vector(
-        #     cos(theta * raidus),
-        #     sin(theta * raidus),
-        #     0
-        # )
+        self.theta = self.theta + angular_velocity
+        self.pointer.axis = vector(
+            cos(self.theta) * self.magnitude,
+            sin(self.theta) * self.magnitude,
+            0
+        )
 
 # test_object_animation_space = sphere(
 #     canvas = animation_scene,
@@ -132,9 +130,10 @@ class magnetic_pointer:
 
 def rotate_all():
 
-    for i in len(pointer_list):
+    #for all pointers (p) in the list, rotate
+    for p in pointer_list:
 
-        pointer_list[i].rotate_self()
+        p.rotate_self()
 
 
 
@@ -184,7 +183,7 @@ def start_button_clicked(evt):
 
     rotate_all()
 
-control_panel.bind('click', start_button_clicked)
+control_panel.bind('mousedown', start_button_clicked)
 
 
 
@@ -206,12 +205,12 @@ def Run():
     create_button(control_panel, 'Play/Pause', '⏯')
 
     #tracks the mouse's posistion in the control pannel -jc
-    mouse_location = control_panel.mouse.pos
-
+    mouse_location = scene.mouse.pos
 
 
     while True:
         rate(60)
+        rotate_all()
 
 
 #----------------------------Start the sim----------------------------#
