@@ -52,17 +52,17 @@ class magnetic_pointer:
         self.body = sphere(
                 canvas = animation_scene,
                 pos = self.posistion,
-                radius = .5,
+                radius = .1,
                 color = color.red,
                 visible = True
         )
         self.pointer = arrow(
                 canvas = animation_scene,
                 pos = self.posistion,
-                axis = vector(0, 1, 0),
-                shaftwidth =.2,
-                headwidth= .4,
-                headlength = .15,
+                axis = vector(0, .2, 0),
+                shaftwidth =.04, #magnitude/5
+                headwidth= .08, #magnitude*2/5
+                headlength = .04, #=shaftwidth
                 color = color.blue,
                 round = True,
                 visible = True
@@ -197,7 +197,16 @@ def Run():
 
     #-------------------Set up animation canvas---------------#
 
-    test_pointer = magnetic_pointer(vector(0,0,0))
+    # test_pointer = magnetic_pointer(vector(0,0,0))
+
+    for i in range(3):
+
+        for j in range(3):
+
+            magnetic_pointer(vector(i,j,0))
+            magnetic_pointer(vector(-i,-j,0))
+            magnetic_pointer(vector(-i,j,0))
+            magnetic_pointer(vector(i,-j,0))
 
     #--------------------Set up control panel------------------#
 
