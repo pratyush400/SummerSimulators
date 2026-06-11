@@ -9,6 +9,8 @@ from random import choice
 
 pointer_list = []
 
+Animation_playing = False
+
 #----------------------------Create Scenes----------------------------#
 
 animation_scene = canvas(
@@ -181,7 +183,9 @@ def create_button(chosen_canvas, text, icon):
 
 def start_button_clicked(evt):
 
-    rotate_all()
+    global Animation_playing
+
+    Animation_playing = not Animation_playing
 
 control_panel.bind('mousedown', start_button_clicked)
 
@@ -219,7 +223,8 @@ def Run():
 
     while True:
         rate(60)
-        rotate_all()
+        if Animation_playing == True:
+            rotate_all()
 
 
 #----------------------------Start the sim----------------------------#
