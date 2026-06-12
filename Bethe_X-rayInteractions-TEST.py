@@ -6,22 +6,16 @@ from vpython import *
 from random import choice
 
 
+text_size = 20
+
 scene=canvas(width =1024, height=480, center=vector(0,0,0), background=color.white, resizable=False, userzoom=False, userspin=False)
 scene.lights=[]
 distant_light(direction=vector( 0.22, 0.44, 0.88), color=color.white)
 distant_light(direction=vector(-0.88, -0.22, -0.44), color=color.white)
 #Moved down 100 affects below
-browser_window = window
+
 my_bookImage = box(pos=vector(0,-100,0), length=scene.width, height=scene.height, texture="https://i.imgur.com/ipbI9jA.jpeg", shininess=0, visible = False, color=color.white)
 
-#Text to speech
-
-YOUR_DOCUMENT_TEXT = """
-Paste your text here. 
-It can span multiple lines and paragraphs.
-For example: Hello! This text is stored directly inside the code.
-The browser will read it perfectly without needing any external file.
-"""
 
 #Variables
 atoms_loc = scene.width/2
@@ -162,6 +156,9 @@ my_CS_label=label(pos=vector(0,-230,0), text="Compton scattering event!", box=Fa
 my_TR_label=label(pos=vector(0,-230,0), text="Transmission!", box=False, color=vector(0,0.3,0.3), height=text_size, opacity=0, visible=False)
 my_mech_lbl_list=[my_PE_label, my_CS_label,my_TR_label]
 my_target_lbl_list=[my_water_lbl,my_bone_lbl,my_lead_lbl]
+#TTS audio 
+window.eval("var myAudio = new Audio('https://medicalimaging.watzekdi.net/images/Xray_images/Activity2-Interactions/X-ray%20Interactions.mp3');")
+audio_playing = False
 #scaling_sphere = sphere(pos=vector(atoms_loc,0,0), radius=5, opacity=0)
 
 #Rescaling original pulse and changing start point on y
@@ -177,24 +174,6 @@ scaling_sphere2=sphere(pos=vector(0,-1*atomic_label.pos.y+7*text_size,0), opacit
 title = label(pos=vector(0,-1*atomic_label.pos.y+8*text_size,0), text='Explore Interactions Between Diagnostic X-rays and Matter', font='helvetica', height=1.5*text_size, box=False, visible=True, color=color.black, opacity=0)
 lbl_start=label(pos=vector(0,-330,0), text="Start with Activities (link at top)!", font="helvetica", box=True, canvas=scene, color=vector(0,0.36,0.39), height=15, visible=True, opacity=0)
 
-# # 2. Text-to-speech execution engine
-# def speak_text(text_to_say):
-#     if hasattr(browser_window, 'speechSynthesis'):
-#         # Create the audio object
-#         utterance = browser_window.SpeechSynthesisUtterance(text_to_say)
-        
-#         # Speech settings
-#         utterance.rate = 1.0   # Speed (0.1 to 10)
-#         utterance.pitch = 1.0  # Pitch (0 to 2)
-        
-#         # Read the text out loud
-#         browser_window.speechSynthesis.speak(utterance)
-#     else:
-#         print("Text-to-speech is not supported in this browser.")
-
-# # 3. Interactive button callback
-# def handle_button_click():
-#     speak_text(YOUR_DOCUMENT_TEXT)
 
 # Hyperlinks 
 s = '''<font size=4> <font>'''
@@ -218,18 +197,14 @@ def link4(url, d):
     v += "<a href='https://medicalimaging.watzekdi.net/images/Xray_images/Activity2-Interactions/%20Information-Interactions.png" + "' target='_blank'>" + url + "</a>"
     v += d
     
-
-
 link4("Information", "&nbsp &nbsp &nbsp")
 scene.append_to_title(v)
 link3("Background", "&nbsp &nbsp &nbsp")
 scene.append_to_title(q)
 link2("Activities", "&nbsp &nbsp &nbsp")
 scene.append_to_title(l)
-scene.append_to_title("<br><br>")
 
-# # 3. Create the widget natively. This directly passes browser authorization so speech triggers instantly!
-# speech_button = button(bind=handle_button_click, text="Click to Speak")
+
 
 # Functions
 
@@ -561,7 +536,7 @@ def create_buttons(chosen_canvas, text_list, icon_list): #Positioning buttons un
         button_icon_list.append(label(pos=button_box_list[i].pos, text=icon_list[i], height=button_box_list[i].height/1.7, color=color.black, box=False, opacity=0))
         button_text_list.append(label(pos=button_box_list[i].pos-vector(0,button_box_list[i].height/2+text_size,0), text=text_list[i], height=text_size, color=color.black, box=False, opacity=0))
 
-create_buttons(control_panel, ['Play/Pause', 'PE', 'Compton', 'Transmission'], ['⏯','⚛️','📈','📡'])
+create_buttons(control_panel, ['Play/Pause', 'PE', 'Compton', 'Transmission', 'Background Audio'], ['⏯','⚛️','📈','📡', '🔈'])
 
 loc_b=vector(0,0,0)
 def Run():
@@ -725,6 +700,25 @@ def trans_but(): #Make lead
             my_electrons_list[i].visible=False
 #control_panel.bind("mousedown", trans_but)
 control_panel.unbind("mousedown", trans_but)
+
+def tts_but():
+    global loc_b, audio_playing
+    pause = True
+    loc_b = control_panel.mouse.pos
+
+    if abs(loc_b.x - button_box_list[4].pos.x) <= button_box_list[0].length / 2 and  abs(loc_b.y - button_box_list[4].pos.y) <= button_box_list[0].height / 2:
+       
+       if not audio_playing:
+           window.eval("myAudio.play();")
+           audio_playing = True
+           button_box_list[4].color = color.green
+       else:
+           window.eval("myAudio.pause();")
+           audio_playing = False
+           button_box_list[4].color = vec(0.5, 0.5, 0.5)
+       
+
+control_panel.bind("mousedown", tts_but)
 
 #Running
 while True:
