@@ -9,6 +9,9 @@ from random import choice
 pointer_list = []
 button_list = []
 
+x_grad = 0
+y_grad = 0
+
 Animation_playing = False
 
 #----------------------------Create Scenes----------------------------#
@@ -80,7 +83,7 @@ class magnetic_pointer:
     def calculate_magnetic_field(self):
 
         #B = background_field + (x_pos * x_gradient) + (y_pos * x_gradient)
-        self.magnetic_field = 1 + (.1 * self.position.x) + (.1 * self.position.y)
+        self.magnetic_field = 1 + (x_grad * self.position.x) + (y_grad * self.position.y)
         return self.magnetic_field
 
     #rotate for 1 ms
@@ -95,6 +98,7 @@ class magnetic_pointer:
             sin(self.theta) * self.magnitude,
             0
         )
+
 
 #----------------------------Create 3d Objects for control pannel----------------------------#
 
@@ -161,7 +165,7 @@ class button:
         dx = abs(click_pos.x - self.position.x)
         dy = abs(click_pos.y - self.position.y)
 
-        #both must be within half of the buttons raidus to be true
+        #both must be within half of the buttons raidus to be True
         return dx <= 0.2 and dy <= 0.2
 
     def clicked(self):
@@ -184,6 +188,12 @@ def rotate_all():
     for p in pointer_list:
 
         p.rotate_self()
+
+def adjust_x_gradient(slider):
+    x_grad = slider.value
+
+def adjust_y_gradient(slider):
+    y_grad = slider.value
 
 
 
@@ -238,9 +248,9 @@ def Run():
 
     # test_pointer = magnetic_pointer(vector(0,0,0))
 
-    for i in range(3):
+    for i in range(2):
 
-        for j in range(3):
+        for j in range(2):
 
             magnetic_pointer(vector(i,j,0))
             magnetic_pointer(vector(-i,-j,0))
@@ -251,15 +261,40 @@ def Run():
 
     #create play/pause
     button(control_panel, vector(-3,0,0), 'Play/Pause', '⏯', start_button_clicked)
+
     #create reset
     button(control_panel, vector(3,0,0), 'Reset', '⟳', reset_button_clicked)
 
     #tracks the mouse's position in the control pannel -jc
     mouse_location = scene.mouse.pos
 
+#create slider for user control
+x_grad_slider = slider(
+    bind = adjust_x_gradient,
+    min = -10, 
+    max = 10, 
+    step = .01, 
+    value = 0, 
+    length = 200,
+    width = 10
+) 
+
+y_grad_slider = slider(
+    bind = adjust_y_gradient,
+    min = -10, 
+    max = 10, 
+    step = .01, 
+    value = 0, 
+    length = 200,
+    width = 10,
+    vertical = True
+) 
+
 
     while True:
+
         rate(60)
+
         if Animation_playing == True:
             rotate_all()
 
