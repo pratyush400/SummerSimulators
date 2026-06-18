@@ -24,7 +24,7 @@ animation_scene = canvas(
     resizable = False,
     userzoom = False,
     userspin = False
-    )
+)
 
 animation_scene.lights = []
 distant_light(direction = vector( 0.22, 0.44, 0.88), color = color.white)
@@ -39,7 +39,7 @@ control_panel = canvas(
     userspin = False,
     userzoom = False,
     resizable = False
-    )   
+)   
 
 #----------------------------Create Objects for animation pannel----------------------------#
 
@@ -169,12 +169,15 @@ class button:
         return dx <= 0.2 and dy <= 0.2
 
     def clicked(self):
+        #swap on/off state
         self.on = not self.on
 
+        #set color correctly if on/off
         if self.on:
             self.box.color = color.green
         else: self.box.color = vector(.5, .5, .5)
 
+        #call the function associated with the button
         if self.action:
             self.action(self)
 
@@ -190,9 +193,11 @@ def rotate_all():
         p.rotate_self()
 
 def adjust_x_gradient(slider):
+    global x_grad
     x_grad = slider.value
 
 def adjust_y_gradient(slider):
+    global y_grad
     y_grad = slider.value
 
 
@@ -268,27 +273,27 @@ def Run():
     #tracks the mouse's position in the control pannel -jc
     mouse_location = scene.mouse.pos
 
-#create slider for user control
-x_grad_slider = slider(
-    bind = adjust_x_gradient,
-    min = -10, 
-    max = 10, 
-    step = .01, 
-    value = 0, 
-    length = 200,
-    width = 10
-) 
+    #create slider for user control
+    x_grad_slider = slider(
+        bind = adjust_x_gradient,
+        min = -10, 
+        max = 10, 
+        step = .01, 
+        value = 0, 
+        length = 200,
+        width = 10
+    ) 
 
-y_grad_slider = slider(
-    bind = adjust_y_gradient,
-    min = -10, 
-    max = 10, 
-    step = .01, 
-    value = 0, 
-    length = 200,
-    width = 10,
-    vertical = True
-) 
+    y_grad_slider = slider(
+        bind = adjust_y_gradient,
+        min = -10, 
+        max = 10, 
+        step = .01, 
+        value = 0, 
+        length = 200,
+        width = 10,
+        vertical = True
+    ) 
 
 
     while True:
