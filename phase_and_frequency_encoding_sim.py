@@ -4,10 +4,10 @@ Web VPython 3.2
 from vpython import *
 from random import choice
 
-
 #----------------------------Declare Globals----------------------------#
 
 pointer_list = []
+button_list = []
 
 Animation_playing = False
 
@@ -45,22 +45,22 @@ control_panel = canvas(
 #create a class that contains all infromation needed for rotating the "magnetic pointers" at different speeds
 class magnetic_pointer:
 
-    def __init__(self, posistion):
-        self.posistion = posistion
+    def __init__(self, position: vector):
+        self.position = position
 
         self.theta = pi/2
 
-        #set up the circle and arrow for the spinner/posistion
+        #set up the circle and arrow for the spinner/position
         self.body = sphere(
                 canvas = animation_scene,
-                pos = self.posistion,
+                pos = self.position,
                 radius = .1,
                 color = color.red,
                 visible = True
         )
         self.pointer = arrow(
                 canvas = animation_scene,
-                pos = self.posistion,
+                pos = self.position,
                 axis = vector(0, .2, 0),
                 shaftwidth =.04, #magnitude/5
                 headwidth= .08, #magnitude*2/5
@@ -80,7 +80,7 @@ class magnetic_pointer:
     def calculate_magnetic_field(self):
 
         #B = background_field + (x_pos * x_gradient) + (y_pos * x_gradient)
-        self.magnetic_field = 1 + (.1 * self.posistion.x) + (.1 * self.posistion.y)
+        self.magnetic_field = 1 + (.1 * self.position.x) + (.1 * self.position.y)
         return self.magnetic_field
 
     #rotate for 1 ms
@@ -96,36 +96,84 @@ class magnetic_pointer:
             0
         )
 
-# test_object_animation_space = sphere(
-#     canvas = animation_scene,
-#     pos = vector(0,0,0),
-#     radius = 1,
-#     color = color.red,
-#     visible = False
-#     )
-
-# test_arrow = arrow(
-#     canvas = animation_scene,
-#     pos = vector(0, 0, 0),
-#     axis = vector(0, 1, 0),
-#     shaftwidth =.2,
-#     headwidth= .4,
-#     headlength = .15,
-#     color = color.blue,
-#     round = True,
-#     visible = True
-#)
-
-#----------------------------Create Objects for control pannel----------------------------#
+#----------------------------Create 3d Objects for control pannel----------------------------#
 
 
-# test_object_ctrl_panel = sphere(
-#     canvas = control_panel,
-#     pos = vector(0,0,0),
-#     radius = 1,
-#     color = color.red,
-#     visible = False
-#     )
+class button:
+
+    def __init__(self, chosen_canvas, position, text, icon, action):
+
+        self.canvas = chosen_canvas
+
+        self.position = position
+
+        self.title_text = text
+
+        self.icon_text = icon
+
+        #self.action keeps track of the purpose of the button so it can have behavior when clicked
+        self.action = action
+
+        #create the button background
+        self.box = box(
+            canvas = chosen_canvas,
+            pos = position,
+            length = .3,
+            height = .3,
+            width = .001,
+            color = vec(0.5,0.5,0.5),
+
+            shininess = 0,
+            opacity = 0.3,
+        )
+
+        #create the button icon/image
+        self.icon = label(
+            canvas = chosen_canvas,
+            pos = position,
+            text = self.icon_text,
+            height = 20,
+            color = color.black,
+
+            box = False,
+            opacity = 0
+        )
+
+        #create button text
+        self.title = label(
+            canvas = chosen_canvas,
+            pos = position + vector(0, -.25, 0),
+            text = self.title_text,
+            height = 12,
+            color = color.black,
+
+            box = False,
+            opacity = 0
+        )
+
+        self.on = False
+
+        button_list.append(self)
+
+    def is_clicked(self, click_pos):
+
+        #check x and y distance from button center
+        dx = abs(click_pos.x - self.position.x)
+        dy = abs(click_pos.y - self.position.y)
+
+        #both must be within half of the buttons raidus to be true
+        return dx <= 0.2 and dy <= 0.2
+
+    def clicked(self):
+        self.on = not self.on
+
+        if self.on:
+            self.box.color = color.green
+        else: self.box.color = vector(.5, .5, .5)
+
+        if self.action:
+            self.action(self)
+
 
 
 #----------------------------Create functions for animation pannel----------------------------#
@@ -143,53 +191,40 @@ def rotate_all():
 
 #----------------------------Create functions for control pannel----------------------------#
 
-def create_button(chosen_canvas, text, icon):
 
-    #create the button background
-    box(
-        canvas = chosen_canvas,
-        pos=vector(0,0,1),
-        length = chosen_canvas.width * .2,
-        height = chosen_canvas.height * .2,
-        width = 1,
-        color = vec(0.5,0.5,0.5),
+#check to see if any button is triggered on the click
+def click_event(event):
 
-        shininess = 0,
-        opacity = 0.3,
-    )
+    click_pos = event.pos
 
-    #create the button icon/image
-    label(
-        canvas = chosen_canvas,
-        pos = vector(0,0,1),
-        text = icon,
-        height = chosen_canvas.height * .1,
-        color = color.black,
-        box = False,
-        opacity = 0
+    #check to see if the click activates any buttons
+    for b in button_list:
 
-    )
+        if b.is_clicked(click_pos):
 
-    #create button text
-    label(
-        canvas = chosen_canvas,
-        pos = vector(0,0,1),
-        text = text,
-        height = chosen_canvas.height *.1,
-        color = color.black,
-        box = False,
-        opacity = 0
-    )
+            b.clicked()
 
-def start_button_clicked(evt):
+            break
+
+#Detect when a click happens and call click_event
+control_panel.bind('mousedown', click_event)
+
+#assign different function to the different buttons:
+def start_button_clicked(button):
 
     global Animation_playing
 
     Animation_playing = not Animation_playing
 
-control_panel.bind('mousedown', start_button_clicked)
+def reset_button_clicked(button):
 
+    for m in pointer_list:
+        m.theta = pi/2
+        m.pointer.axis = vector(0, m.magnitude, 0)
 
+    button.box.color = vector(.5, .5, .5)
+
+    
 
 
 
@@ -214,10 +249,12 @@ def Run():
 
     #--------------------Set up control panel------------------#
 
-    #sets up images for the control pannel -jc
-    create_button(control_panel, 'Play/Pause', '⏯')
+    #create play/pause
+    button(control_panel, vector(-3,0,0), 'Play/Pause', '⏯', start_button_clicked)
+    #create reset
+    button(control_panel, vector(3,0,0), 'Reset', '⟳', reset_button_clicked)
 
-    #tracks the mouse's posistion in the control pannel -jc
+    #tracks the mouse's position in the control pannel -jc
     mouse_location = scene.mouse.pos
 
 
