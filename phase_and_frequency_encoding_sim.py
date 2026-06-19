@@ -274,6 +274,11 @@ def Run():
     mouse_location = scene.mouse.pos
 
     #create slider for user control
+
+    #select which scene to place the sliders
+    animation_scene.select()
+
+    animation_scene.append_to_caption('X Gradient')
     x_grad_slider = slider(
         bind = adjust_x_gradient,
         min = -10, 
@@ -284,6 +289,7 @@ def Run():
         width = 10
     ) 
 
+    animation_scene.append_to_caption('Y Gradient')
     y_grad_slider = slider(
         bind = adjust_y_gradient,
         min = -10, 
@@ -298,7 +304,7 @@ def Run():
 
     while True:
 
-        rate(60)
+        rate(1)
 
         if Animation_playing == True:
             rotate_all()
