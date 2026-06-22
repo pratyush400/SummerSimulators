@@ -8,6 +8,7 @@ from random import choice
 
 pointer_list = []
 button_list = []
+slider_list = []
 
 x_grad = 0
 y_grad = 0
@@ -35,7 +36,7 @@ control_panel = canvas(
     width =1024,
     height=100,
     center = vector(0, 0, 0),
-    background = vec(0.622, 0.779, 0.847),
+    background = vector(0.622, 0.779, 0.847),
     userspin = False,
     userzoom = False,
     resizable = False
@@ -48,7 +49,7 @@ control_panel = canvas(
 #create a class that contains all infromation needed for rotating the "magnetic pointers" at different speeds
 class magnetic_pointer:
 
-    def __init__(self, position: vector):
+    def __init__(self, position):
         self.position = position
 
         self.theta = pi/2
@@ -99,6 +100,55 @@ class magnetic_pointer:
             0
         )
 
+class slider3d:
+
+    def __init__(self, chosen_canvas, start_pos, end_pos, min_value, max_value):
+        self.canvas = chosen_canvas
+        
+        self.start_pos = start_pos
+        self.end_pos = end_pos
+        
+        #create an axis that moves from the start point to the end point
+        self.axis = end_pos - start_pos
+
+        self.min_val = min_value
+        self.max_val = max_value
+        self.current_value = 0 #initalize for later assignment in update_value
+
+        self.body = cylinder(
+
+            canvas = self.canvas,
+            pos = self.start_pos,
+            axis = self.axis,
+            radius = .03,
+            color = color.black,
+            visible = True
+
+        )
+
+        self.slide = sphere(
+
+            canvas = self.canvas,
+            pos = self.start_pos + .5 * self.axis,
+            radius = .06,
+            color = color.red,
+            visible = True
+
+        )
+
+        #self.update_value()
+
+        slider_list.append(self)
+
+    def update_value(self):
+        percent_full = dot(self.slide.pos - self.start_pos, norm(self.axis)) / mag(self.axis)
+
+        self.current_value = self.min_val + (self.max_val - self.min_val) * percent_full
+
+    def move_slide(self):
+        pass
+
+
 
 #----------------------------Create 3d Objects for control pannel----------------------------#
 
@@ -125,7 +175,7 @@ class button:
             length = .3,
             height = .3,
             width = .001,
-            color = vec(0.5,0.5,0.5),
+            color = vector(0.5,0.5,0.5),
 
             shininess = 0,
             opacity = 0.3,
@@ -192,13 +242,6 @@ def rotate_all():
 
         p.rotate_self()
 
-def adjust_x_gradient(slider):
-    global x_grad
-    x_grad = slider.value
-
-def adjust_y_gradient(slider):
-    global y_grad
-    y_grad = slider.value
 
 
 
@@ -253,14 +296,14 @@ def Run():
 
     # test_pointer = magnetic_pointer(vector(0,0,0))
 
-    for i in range(2):
+    # for i in range(2):
 
-        for j in range(2):
+    #     for j in range(2):
 
-            magnetic_pointer(vector(i,j,0))
-            magnetic_pointer(vector(-i,-j,0))
-            magnetic_pointer(vector(-i,j,0))
-            magnetic_pointer(vector(i,-j,0))
+    #         magnetic_pointer(vector(i,j,0))
+    #         magnetic_pointer(vector(-i,-j,0))
+    #         magnetic_pointer(vector(-i,j,0))
+    #         magnetic_pointer(vector(i,-j,0))
 
     #--------------------Set up control panel------------------#
 
@@ -271,42 +314,21 @@ def Run():
     button(control_panel, vector(3,0,0), 'Reset', '⟳', reset_button_clicked)
 
     #tracks the mouse's position in the control pannel -jc
-    mouse_location = scene.mouse.pos
+    mouse_location_anim = animation_scene.mouse.pos
+    mouse_location_ctrl = control_panel.mouse.pos
 
-    #create slider for user control
-
-    #select which scene to place the sliders
     animation_scene.select()
 
-    animation_scene.append_to_caption('X Gradient')
-    x_grad_slider = slider(
-        bind = adjust_x_gradient,
-        min = -10, 
-        max = 10, 
-        step = .01, 
-        value = 0, 
-        length = 200,
-        width = 10
-    ) 
-
-    animation_scene.append_to_caption('Y Gradient')
-    y_grad_slider = slider(
-        bind = adjust_y_gradient,
-        min = -10, 
-        max = 10, 
-        step = .01, 
-        value = 0, 
-        length = 200,
-        width = 10,
-        vertical = True
-    ) 
-
+    #create sliders
+    #do not break sliders (or any class for that matter) into multiple lines, this breaks glowscripts ability to translate into js.
+    x_slider = slider3d(animation_scene, vector(-2,-1,0), vector(2,-1,0), -10, 10)
+    y_slider = slider3d(animation_scene, vector(-2,-1,0), vector(-2,1,0), -10, 10)
 
     while True:
 
-        rate(1)
+        rate(60)
 
-        if Animation_playing == True:
+        if Animation_playing:
             rotate_all()
 
 
