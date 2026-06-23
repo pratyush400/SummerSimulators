@@ -84,7 +84,7 @@ class magnetic_pointer:
     def calculate_magnetic_field(self):
 
         #B = background_field + (x_pos * x_gradient) + (y_pos * x_gradient)
-        self.magnetic_field = 1 + (x_grad * self.position.x) + (y_grad * self.position.y)
+        self.magnetic_field = 3 + (slider_list[0].current_value * self.position.x) + (slider_list[1].current_value * self.position.y)
         return self.magnetic_field
 
     #rotate for 1 ms
@@ -136,7 +136,7 @@ class slider3d:
 
         )
 
-        #self.update_value()
+        self.dragging = False
 
         slider_list.append(self)
 
@@ -145,8 +145,30 @@ class slider3d:
 
         self.current_value = self.min_val + (self.max_val - self.min_val) * percent_full
 
-    def move_slide(self):
-        pass
+    def is_clicked(self, click_pos):
+
+        return mag(click_pos - self.slide.pos) <= .06
+        
+        
+    def move(self):
+
+        #establish new relitive location
+
+        loc_rel = animation_scene.mouse.pos -self.start_pos
+
+        #calculate % of slider active
+        loc_percentage = dot(loc_rel, self.axis) / mag2(self.axis)
+
+        #set bounds
+
+        if loc_percentage < 0:
+            loc_percentage = 0
+        elif loc_percentage > 1:
+            loc_percentage = 1
+
+        #move
+        self.slide.pos = self.start_pos + (self.axis * loc_percentage)
+
 
 
 
@@ -263,9 +285,20 @@ def click_event(event):
             b.clicked()
 
             break
+    
+    for s in slider_list:
+
+        if s.is_clicked(click_pos):
+            s.dragging = True
+
+def unclick(event):
+    for s in slider_list:
+        s.dragging = False
 
 #Detect when a click happens and call click_event
 control_panel.bind('mousedown', click_event)
+animation_scene.bind('mousedown', click_event)
+animation_scene.bind('mouseup', unclick)
 
 #assign different function to the different buttons:
 def start_button_clicked(button):
@@ -294,16 +327,21 @@ def Run():
 
     #-------------------Set up animation canvas---------------#
 
-    # test_pointer = magnetic_pointer(vector(0,0,0))
+    test_pointer = magnetic_pointer(vector(0,0,0))
 
-    # for i in range(2):
+    i = 0
+    while i < 2:
+        j = 0
+        while j < 2:
 
-    #     for j in range(2):
+            magnetic_pointer(vector(.6 * i, .6 * j, 0))
+            magnetic_pointer(vector(.6 * -i, .6 * -j, 0))
+            magnetic_pointer(vector(.6 * -i, .6 * j, 0))
+            magnetic_pointer(vector(.6 * i, .6 * -j, 0))
 
-    #         magnetic_pointer(vector(i,j,0))
-    #         magnetic_pointer(vector(-i,-j,0))
-    #         magnetic_pointer(vector(-i,j,0))
-    #         magnetic_pointer(vector(i,-j,0))
+            j += 1
+
+        i += 1
 
     #--------------------Set up control panel------------------#
 
@@ -313,9 +351,6 @@ def Run():
     #create reset
     button(control_panel, vector(3,0,0), 'Reset', '⟳', reset_button_clicked)
 
-    #tracks the mouse's position in the control pannel -jc
-    mouse_location_anim = animation_scene.mouse.pos
-    mouse_location_ctrl = control_panel.mouse.pos
 
     animation_scene.select()
 
@@ -328,9 +363,19 @@ def Run():
 
         rate(60)
 
+        #tracks the mouse's position in the control pannel -jc
+        mouse_location_anim = animation_scene.mouse.pos
+        mouse_location_ctrl = control_panel.mouse.pos
+
         if Animation_playing:
             rotate_all()
 
+        for s in slider_list:
+
+            if s.dragging:
+
+                s.move()
+                s.update_value()
 
 #----------------------------Start the sim----------------------------#
 
