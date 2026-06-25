@@ -111,8 +111,8 @@ class slider3d:
         #create an axis that moves from the start point to the end point
         self.axis = end_pos - start_pos
 
-        self.min_val = min_value
-        self.max_val = max_value
+        self.min_value = min_value
+        self.max_value = max_value
         self.current_value = 0 #initalize for later assignment in update_value
 
         self.body = cylinder(
@@ -139,11 +139,12 @@ class slider3d:
         self.dragging = False
 
         slider_list.append(self)
+        self.update_value
 
     def update_value(self):
         percent_full = dot(self.slide.pos - self.start_pos, norm(self.axis)) / mag(self.axis)
 
-        self.current_value = self.min_val + (self.max_val - self.min_val) * percent_full
+        self.current_value = self.min_value + (self.max_value - self.min_value) * percent_full
 
     def is_clicked(self, click_pos):
 
@@ -154,12 +155,12 @@ class slider3d:
 
         #establish new relitive location
 
-        loc_rel = animation_scene.mouse.pos -self.start_pos
+        loc_rel = animation_scene.mouse.pos - self.start_pos
 
         #calculate % of slider active
         loc_percentage = dot(loc_rel, self.axis) / mag2(self.axis)
 
-        #set bounds
+        #set bounds for slider range
 
         if loc_percentage < 0:
             loc_percentage = 0
@@ -307,7 +308,7 @@ def start_button_clicked(button):
 
     Animation_playing = not Animation_playing
 
-def reset_button_clicked(button):
+def reset_button_clicked_pointers(button):
 
     for m in pointer_list:
         m.theta = pi/2
@@ -315,6 +316,13 @@ def reset_button_clicked(button):
 
     button.box.color = vector(.5, .5, .5)
 
+def reset_button_clicked_sliders(button):
+
+    for s in slider_list:
+        s.slide.pos = s.start_pos + s.axis * .5
+        s.current_value = (s.max_value + s.min_value) / 2
+
+    button.box.color = vector(.5, .5, .5)
     
 
 
@@ -326,8 +334,6 @@ def reset_button_clicked(button):
 def Run():
 
     #-------------------Set up animation canvas---------------#
-
-    test_pointer = magnetic_pointer(vector(0,0,0))
 
     i = 0
     while i < 2:
@@ -348,16 +354,18 @@ def Run():
     #create play/pause
     button(control_panel, vector(-3,0,0), 'Play/Pause', '⏯', start_button_clicked)
 
-    #create reset
-    button(control_panel, vector(3,0,0), 'Reset', '⟳', reset_button_clicked)
+    #create spinner reset
+    button(control_panel, vector(3,0,0), 'Reset Pointers', '⟳', reset_button_clicked_pointers)
+    #create slider reset
+    button(control_panel, vector(2,0,0), 'Reset Gradient', '⟳', reset_button_clicked_sliders)
 
 
     animation_scene.select()
 
     #create sliders
     #do not break sliders (or any class for that matter) into multiple lines, this breaks glowscripts ability to translate into js.
-    x_slider = slider3d(animation_scene, vector(-2,-1,0), vector(2,-1,0), -10, 10)
-    y_slider = slider3d(animation_scene, vector(-2,-1,0), vector(-2,1,0), -10, 10)
+    x_slider = slider3d(animation_scene, vector(-2,-1,0), vector(2,-1,0), -1, 1)
+    y_slider = slider3d(animation_scene, vector(-2,-1,0), vector(-2,1,0), -1, 1)
 
     while True:
 
