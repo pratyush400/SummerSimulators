@@ -15,6 +15,9 @@ y_grad = 0
 
 Animation_playing = False
 
+gradient_active = False
+
+
 #----------------------------Create Scenes----------------------------#
 
 animation_scene = canvas(
@@ -41,6 +44,18 @@ control_panel = canvas(
     userzoom = False,
     resizable = False
 )   
+
+#----------------------------Create Title-----------------------------#
+
+title = label(
+    canvas=animation_scene,
+    pos=vector(0, 1, 0),
+    text="Investigateing Phase and Frequency",
+    height=20,
+    color=color.black,
+    box=False,
+    opacity=0
+)
 
 #----------------------------Create Objects for animation pannel----------------------------#
 
@@ -84,7 +99,12 @@ class magnetic_pointer:
     def calculate_magnetic_field(self):
 
         #B = background_field + (x_pos * x_gradient) + (y_pos * x_gradient)
-        self.magnetic_field = 3 + (slider_list[0].current_value * self.position.x) + (slider_list[1].current_value * self.position.y)
+
+        B = 3
+        if gradient_active:
+            B += (slider_list[0].current_value * self.position.x) + (slider_list[1].current_value * self.position.y)
+
+        self.magnetic_field = B
         return self.magnetic_field
 
     #rotate for 1 ms
@@ -100,6 +120,8 @@ class magnetic_pointer:
             0
         )
 
+#create a class so we can include sliders in the animation pannel
+
 class slider3d:
 
     def __init__(self, chosen_canvas, start_pos, end_pos, min_value, max_value):
@@ -113,7 +135,7 @@ class slider3d:
 
         self.min_value = min_value
         self.max_value = max_value
-        self.current_value = 0 #initalize for later assignment in update_value
+        self.current_value = (self.min_value + self.max_value) / 2
 
         self.body = cylinder(
 
@@ -126,20 +148,29 @@ class slider3d:
 
         )
 
-        self.slide = sphere(
+        # self.slide = sphere(
 
+        #     canvas = self.canvas,
+        #     pos = self.start_pos + .5 * self.axis,
+        #     radius = .06,
+        #     color = color.red,
+        #     visible = True
+
+        # )
+
+        self.slide = box(
             canvas = self.canvas,
-            pos = self.start_pos + .5 * self.axis,
-            radius = .06,
-            color = color.red,
-            visible = True
 
+            pos = self.start_pos + .5 * self.axis,
+            length = .12,                
+            height = .12,                
+            width = .12,                 
+            color = vector(.4, .4, .4)
         )
 
         self.dragging = False
 
         slider_list.append(self)
-        self.update_value
 
     def update_value(self):
         percent_full = dot(self.slide.pos - self.start_pos, norm(self.axis)) / mag(self.axis)
@@ -299,6 +330,9 @@ def unclick(event):
 #Detect when a click happens and call click_event
 control_panel.bind('mousedown', click_event)
 animation_scene.bind('mousedown', click_event)
+
+#Detect when the mouse is lifed so we dont do unintentional functions
+control_panel.bind('mouseup', unclick)
 animation_scene.bind('mouseup', unclick)
 
 #assign different function to the different buttons:
@@ -307,6 +341,12 @@ def start_button_clicked(button):
     global Animation_playing
 
     Animation_playing = not Animation_playing
+
+def gradient_button(button):
+
+    global gradient_active
+
+    gradient_active = not gradient_active
 
 def reset_button_clicked_pointers(button):
 
@@ -353,6 +393,8 @@ def Run():
 
     #create play/pause
     button(control_panel, vector(-3,0,0), 'Play/Pause', '⏯', start_button_clicked)
+    #create button to control gradient state
+    button(control_panel, vector(-2,0,0), 'Activate gradient', '⏯', gradient_button)
 
     #create spinner reset
     button(control_panel, vector(3,0,0), 'Reset Pointers', '⟳', reset_button_clicked_pointers)
@@ -364,8 +406,8 @@ def Run():
 
     #create sliders
     #do not break sliders (or any class for that matter) into multiple lines, this breaks glowscripts ability to translate into js.
-    x_slider = slider3d(animation_scene, vector(-2,-1,0), vector(2,-1,0), -1, 1)
-    y_slider = slider3d(animation_scene, vector(-2,-1,0), vector(-2,1,0), -1, 1)
+    x_slider = slider3d(animation_scene, vector(-2,-1,0), vector(2,-1,0), -2, 2)
+    y_slider = slider3d(animation_scene, vector(-2,-1,0), vector(-2,1,0), -2, 2)
 
     while True:
 
