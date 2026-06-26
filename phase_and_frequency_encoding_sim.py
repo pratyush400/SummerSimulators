@@ -93,6 +93,8 @@ class magnetic_pointer:
 
         self.magnetic_field = 0
 
+        self.frequency = 0
+
         pointer_list.append(self)
 
 
@@ -107,7 +109,7 @@ class magnetic_pointer:
         self.magnetic_field = B
         return self.magnetic_field
 
-    #rotate for 1 ms
+    #rotate for 1 timeframe
     def rotate_self(self):
 
         B = self.calculate_magnetic_field()
@@ -119,6 +121,17 @@ class magnetic_pointer:
             sin(self.theta) * self.magnitude,
             0
         )
+
+    def calculate_frequency(self):
+
+        B = self.calculate_magnetic_field()
+
+        angular_velocity = pi/180 * B
+
+        self.frequency = angular_velocity / (2*pi)
+
+        return self.frequency
+
 
 #create a class so we can include sliders in the animation pannel
 
@@ -348,6 +361,16 @@ def gradient_button(button):
 
     gradient_active = not gradient_active
 
+def take_picture(button):
+
+    for i, m in enumerate(pointer_list):
+
+        #note: the f in the leadint section of the print statment just declares that the text is formatted
+        #the :.4f just says to round to the 4th floating point number
+        
+        #remember, the print command is required to be one line
+        print(f"Pointer {i+1}: "+f"Frequency = {m.calculate_frequency():.4f}, "+f"Theta = {m.theta:.4f} rad")
+
 def reset_button_clicked_pointers(button):
 
     for m in pointer_list:
@@ -375,19 +398,17 @@ def Run():
 
     #-------------------Set up animation canvas---------------#
 
-    i = 0
-    while i < 2:
-        j = 0
-        while j < 2:
+    magnetic_pointer(vector(-0.6, -0.6, 0))
+    magnetic_pointer(vector( 0.0, -0.6, 0))
+    magnetic_pointer(vector( 0.6, -0.6, 0))
 
-            magnetic_pointer(vector(.6 * i, .6 * j, 0))
-            magnetic_pointer(vector(.6 * -i, .6 * -j, 0))
-            magnetic_pointer(vector(.6 * -i, .6 * j, 0))
-            magnetic_pointer(vector(.6 * i, .6 * -j, 0))
+    magnetic_pointer(vector(-0.6,  0.0, 0))
+    magnetic_pointer(vector( 0.0,  0.0, 0))
+    magnetic_pointer(vector( 0.6,  0.0, 0))
 
-            j += 1
-
-        i += 1
+    magnetic_pointer(vector(-0.6,  0.6, 0))
+    magnetic_pointer(vector( 0.0,  0.6, 0))
+    magnetic_pointer(vector( 0.6,  0.6, 0))
 
     #--------------------Set up control panel------------------#
 
@@ -395,6 +416,8 @@ def Run():
     button(control_panel, vector(-3,0,0), 'Play/Pause', '⏯', start_button_clicked)
     #create button to control gradient state
     button(control_panel, vector(-2,0,0), 'Activate gradient', '⏯', gradient_button)
+
+    button(control_panel, vector(-1,0,0), 'Picture', '📷', take_picture)
 
     #create spinner reset
     button(control_panel, vector(3,0,0), 'Reset Pointers', '⟳', reset_button_clicked_pointers)
