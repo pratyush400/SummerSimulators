@@ -318,7 +318,7 @@ def rotate_all():
 
 
 #check to see if any button is triggered on the click
-def click_event(event):
+def click_event_ctrl(event):
 
     click_pos = event.pos
 
@@ -329,20 +329,26 @@ def click_event(event):
 
             b.clicked()
 
-            break
-    
+            return
+
+def click_event_anim(event):
+
+    click_pos = event.pos
+
     for s in slider_list:
 
         if s.is_clicked(click_pos):
             s.dragging = True
+
+            return
 
 def unclick(event):
     for s in slider_list:
         s.dragging = False
 
 #Detect when a click happens and call click_event
-control_panel.bind('mousedown', click_event)
-animation_scene.bind('mousedown', click_event)
+control_panel.bind('mousedown', click_event_ctrl)
+animation_scene.bind('mousedown', click_event_anim)
 
 #Detect when the mouse is lifed so we dont do unintentional functions
 control_panel.bind('mouseup', unclick)
