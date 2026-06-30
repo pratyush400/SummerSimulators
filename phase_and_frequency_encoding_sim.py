@@ -161,16 +161,6 @@ class slider3d:
 
         )
 
-        # self.slide = sphere(
-
-        #     canvas = self.canvas,
-        #     pos = self.start_pos + .5 * self.axis,
-        #     radius = .06,
-        #     color = color.red,
-        #     visible = True
-
-        # )
-
         self.slide = box(
             canvas = self.canvas,
 
@@ -183,7 +173,7 @@ class slider3d:
 
         self.label = text(
             text = labeltext,
-            pos = self.start_pos + .5 * self.axis, # + orthoginol distance
+            pos = self.start_pos + .45 * self.axis + .2 * norm(cross(self.axis, vector(0,0,1))),
             axis = self.axis,
             height = 0.08,
             depth = 0.004,
@@ -397,7 +387,7 @@ def reset_button_clicked_pointers(button):
 def reset_button_clicked_sliders(button):
 
     for s in slider_list:
-        s.slide.pos = s.start_pos + s.axis * .5
+        s.slide.pos = s.start_pos + s.axis * .5 + vector(0,0,.04)
         s.current_value = (s.max_value + s.min_value) / 2
 
     button.box.color = vector(.5, .5, .5)
