@@ -50,7 +50,7 @@ control_panel = canvas(
 title = label(
     canvas=animation_scene,
     pos=vector(0, 1, 0),
-    text="Investigateing Phase and Frequency",
+    text="Investigating Phase and Frequency Encoding",
     height=20,
     color=color.black,
     box=False,
@@ -137,7 +137,7 @@ class magnetic_pointer:
 
 class slider3d:
 
-    def __init__(self, chosen_canvas, start_pos, end_pos, min_value, max_value):
+    def __init__(self, chosen_canvas, start_pos, end_pos, min_value, max_value, labeltext):
         self.canvas = chosen_canvas
         
         self.start_pos = start_pos
@@ -174,11 +174,20 @@ class slider3d:
         self.slide = box(
             canvas = self.canvas,
 
-            pos = self.start_pos + .5 * self.axis,
+            pos = self.start_pos + .5 * self.axis + vector(0,0,.04),
             length = .12,                
             height = .12,                
-            width = .12,                 
+            width = .01,                 
             color = vector(.4, .4, .4)
+        )
+
+        self.label = text(
+            text = labeltext,
+            pos = self.start_pos + .5 * self.axis, # + orthoginol distance
+            axis = self.axis,
+            height = 0.08,
+            depth = 0.004,
+            color = color.black
         )
 
         self.dragging = False
@@ -212,7 +221,7 @@ class slider3d:
             loc_percentage = 1
 
         #move
-        self.slide.pos = self.start_pos + (self.axis * loc_percentage)
+        self.slide.pos = self.start_pos + (self.axis * loc_percentage) + vector(0,0,.04)
 
 
 
@@ -435,8 +444,8 @@ def Run():
 
     #create sliders
     #do not break sliders (or any class for that matter) into multiple lines, this breaks glowscripts ability to translate into js.
-    x_slider = slider3d(animation_scene, vector(-2,-1,0), vector(2,-1,0), -2, 2)
-    y_slider = slider3d(animation_scene, vector(-2,-1,0), vector(-2,1,0), -2, 2)
+    x_slider = slider3d(animation_scene, vector(-2,-1,0), vector(2,-1,0), -2, 2, 'X gradient')
+    y_slider = slider3d(animation_scene, vector(-2,-1,0), vector(-2,1,0), -2, 2, 'Y gradient')
 
     while True:
 
