@@ -95,6 +95,50 @@ class magnetic_pointer:
 
         self.frequency = 0
 
+
+        #this is horrable, and unreadable but glowscript requires it
+        #i have included a readable version below
+
+        self.text_representation = [box(canvas=animation_scene, pos=self.position + vector(0, 0, .1), length=.5, height=.5, width=.001, color=vector(0.5,0.5,0.5), shininess=0, opacity=1, visible=False), label(canvas=animation_scene, text='frequency =', pos=self.position + vector(0,0.15,.11), height=12, depth=0.02, color=color.black, box = False, opacity=0, visible=False), label(canvas=animation_scene, text='angle = ', pos=self.position+vector(0,-0.1,.11), height = 12, depth=0.02, color=color.black, box=False, opacity=0, visible=False)]
+        #self.text_representation = [box(canvas = animation_scene,pos=self.position, length=.3, height=.3, width=.001, color=vector(0.5,0.5,0.5), shininess=0, opacity=0.3, visible=False), label(canvas=animation_scene, text='frequency', pos=self.position+vector(0,.01,0), height=0.08, depth=0.004, color=color.black, visible=False), label(canvas=animation_scene, text='angle', pos=self.position+vector(0,-.01,0), height=0.08, depth=0.004, color=color.black, visible=False)]
+
+        # self.text_representation = [
+        #     background = box(
+        #         canvas = animation_scene,
+        #         pos = self.position,
+        #         length = .3,
+        #         height = .3,
+        #         width = .001,
+        #         color = vector(0.5,0.5,0.5),
+
+        #         shininess = 0,
+        #         opacity = 0.3,
+        #         visible = False
+        #     ),
+        #     frequency_text = label(
+        #         canvas = animation_scene,
+        #         text = 'frequency',
+
+        #         pos = self.position + vector(0,.01,0),
+        #         height = 0.08,
+        #         depth = 0.004,
+        #         color = color.black,
+
+        #         visible = False
+        #     ),
+        #     angle_text = label(
+        #         canvas = animation_scene,
+        #         text = 'angle',
+        #         pos = self.position + vector(0,-.01,0),
+
+        #         height = 0.08,
+        #         depth = 0.004,
+        #         color = color.black,
+
+        #         visible = False
+        #     )
+        # ]
+
         pointer_list.append(self)
 
 
@@ -102,7 +146,7 @@ class magnetic_pointer:
 
         #B = background_field + (x_pos * x_gradient) + (y_pos * x_gradient)
 
-        B = 3
+        B = 6
         if gradient_active:
             B += (slider_list[0].current_value * self.position.x) + (slider_list[1].current_value * self.position.y)
 
@@ -370,11 +414,17 @@ def take_picture(button):
 
     for i, m in enumerate(pointer_list):
 
-        #note: the f in the leadint section of the print statment just declares that the text is formatted
-        #the :.4f just says to round to the 4th floating point number
-        
-        #remember, the print command is required to be one line
-        print(f"Pointer {i+1}: "+f"Frequency = {m.calculate_frequency():.4f}, "+f"Theta = {m.theta:.4f} rad")
+        m.text_representation[1].text =f"Frequency = \n {m.calculate_frequency():.4f} Hz"
+        m.text_representation[2].text =f"Theta = \n {m.theta:.4f} rad"
+
+        for j in m.text_representation:
+
+            if button.on == True:
+                j.visible = True
+
+            if button.on == False:
+                j.visible = False
+
 
 def reset_button_clicked_pointers(button):
 
@@ -434,8 +484,8 @@ def Run():
 
     #create sliders
     #do not break sliders (or any class for that matter) into multiple lines, this breaks glowscripts ability to translate into js.
-    x_slider = slider3d(animation_scene, vector(-2,-1,0), vector(2,-1,0), -2, 2, 'X gradient')
-    y_slider = slider3d(animation_scene, vector(-2,-1,0), vector(-2,1,0), -2, 2, 'Y gradient')
+    x_slider = slider3d(animation_scene, vector(-2,-1,0), vector(2,-1,0), -4, 4, 'X gradient')
+    y_slider = slider3d(animation_scene, vector(-2,-1,0), vector(-2,1,0), -4, 4, 'Y gradient')
 
     while True:
 
@@ -450,10 +500,19 @@ def Run():
 
         for s in slider_list:
 
+            if slider_list[0].dragging: #reset y if x moving
+                slider_list[1].slide.pos = (slider_list[1].start_pos + .5 * slider_list[1].axis +vector(0, 0, .04))
+                slider_list[1].update_value()
+
+            if slider_list[1].dragging: #reset x if y moving
+                slider_list[0].slide.pos = (slider_list[0].start_pos + .5 * slider_list[0].axis +vector(0, 0, .04))
+                slider_list[0].update_value()
+
+
             if s.dragging:
 
                 s.move()
-                s.update_value()
+            s.update_value()
 
 #----------------------------Start the sim----------------------------#
 
