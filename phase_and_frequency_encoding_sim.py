@@ -30,6 +30,7 @@ animation_scene = canvas(
     userspin = False
 )
 
+animation_scene.range = 1.3
 animation_scene.lights = []
 distant_light(direction = vector( 0.22, 0.44, 0.88), color = color.white)
 distant_light(direction = vector(-0.88, -0.22, -0.44), color = color.white)
@@ -45,13 +46,13 @@ control_panel = canvas(
     resizable = False
 )   
 
-#----------------------------Create Title-----------------------------#
+#----------------------------Create Title / Links-----------------------------#
 
 title = label(
     canvas=animation_scene,
-    pos=vector(0, 1, 0),
+    pos=vector(0, 1.2, 0),
     text="Investigating Phase and Frequency Encoding",
-    height=20,
+    height=25,
     color=color.black,
     box=False,
     opacity=0
@@ -209,8 +210,8 @@ class slider3d:
             canvas = self.canvas,
 
             pos = self.start_pos + .5 * self.axis + vector(0,0,.04),
-            length = .12,                
-            height = .12,                
+            length = .16,                
+            height = .16,                
             width = .01,                 
             color = vector(.4, .4, .4)
         )
@@ -235,7 +236,7 @@ class slider3d:
 
     def is_clicked(self, click_pos):
 
-        return mag(click_pos - self.slide.pos) <= .06
+        return mag(click_pos - self.slide.pos) <= .1
         
         
     def move(self):
@@ -376,12 +377,20 @@ def click_event_ctrl(event):
 
 def click_event_anim(event):
 
+    global x_slider
+
     click_pos = event.pos
 
     for s in slider_list:
 
         if s.is_clicked(click_pos):
             s.dragging = True
+
+            #allow x_slide to appear after the y_slider used
+            for obj in slider_list:
+                obj.body.visible = True
+                obj.slide.visible = True
+                obj.label.visible = True
 
             return
 
@@ -484,8 +493,15 @@ def Run():
 
     #create sliders
     #do not break sliders (or any class for that matter) into multiple lines, this breaks glowscripts ability to translate into js.
-    x_slider = slider3d(animation_scene, vector(-2,-1,0), vector(2,-1,0), -4, 4, 'X gradient')
-    y_slider = slider3d(animation_scene, vector(-2,-1,0), vector(-2,1,0), -4, 4, 'Y gradient')
+    x_slider = slider3d(animation_scene, vector(-1,-1,0), vector(1,-1,0), -4, 4, 'y gradient')
+
+    #x_slider not suppoed to be visible initally
+
+    x_slider.body.visible = False
+    x_slider.slide.visible = False
+    x_slider.label.visible = False
+
+    y_slider = slider3d(animation_scene, vector(-2,-.7,0), vector(-2,.7,0), -4, 4, 'y gradient')
 
     while True:
 
