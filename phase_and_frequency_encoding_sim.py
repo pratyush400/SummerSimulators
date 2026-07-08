@@ -6,9 +6,10 @@ from random import choice
 
 #----------------------------Declare Globals----------------------------#
 
-pointer_list = []
+pointer_list = [] #list to store magentic pointers
 button_list = []
 slider_list = []
+arrow_list = [] #list to store the memory arrows for the picture function
 
 x_grad = 0
 y_grad = 0
@@ -17,6 +18,19 @@ Animation_playing = False
 
 gradient_active = False
 
+
+#----------------------------Add Hyperlinks-------------------------------#
+
+#create an invisable canvas, if you dont glowscript doesnt like it
+
+# scene = canvas(width=0, height=0)
+
+link = document.createElement("a")
+link.href = "https://www.glowscript.org"
+link.target = "_blank"
+link.innerHTML = "GlowScript"
+
+document.body.prepend(link)
 
 #----------------------------Create Scenes----------------------------#
 
@@ -435,6 +449,27 @@ def take_picture(button):
                 j.visible = False
 
 
+    #create thea arrows for visual representation
+    if button.on == True:
+        for m in pointer_list:
+            arrow_list.append(
+                arrow(
+                    canvas = animation_scene,
+                    pos = m.position*.6 + vector(1.5,0,0),
+                    axis = m.pointer.axis,
+                    shaftwidth =.04, #magnitude/5
+                    headwidth= .08, #magnitude*2/5
+                    headlength = .04, #=shaftwidth
+                    color = color.blue,
+                    round = True,
+                    visible = True
+                )
+            )
+    
+
+
+
+
 def reset_button_clicked_pointers(button):
 
     for m in pointer_list:
@@ -450,7 +485,16 @@ def reset_button_clicked_sliders(button):
         s.current_value = (s.max_value + s.min_value) / 2
 
     button.box.color = vector(.5, .5, .5)
+
+def reset_button_clicked_arrow_memory(button):
+    global arrow_list
+
+    for a in arrow_list:
+        a.visible = False
     
+    arrow_list = []    
+    button.box.color=vector (.5,.5,.5)
+
 
 
 
@@ -478,6 +522,7 @@ def Run():
 
     #create play/pause
     button(control_panel, vector(-3,0,0), 'Play/Pause', '⏯', start_button_clicked)
+
     #create button to control gradient state
     button(control_panel, vector(-2,0,0), 'Activate gradient', '⏯', gradient_button)
 
@@ -485,17 +530,20 @@ def Run():
 
     #create spinner reset
     button(control_panel, vector(3,0,0), 'Reset Pointers', '⟳', reset_button_clicked_pointers)
+
     #create slider reset
     button(control_panel, vector(2,0,0), 'Reset Gradient', '⟳', reset_button_clicked_sliders)
+
+    button(control_panel, vector(0,0,0), 'Reset arrow memory', '⟳', reset_button_clicked_arrow_memory)
 
 
     animation_scene.select()
 
     #create sliders
     #do not break sliders (or any class for that matter) into multiple lines, this breaks glowscripts ability to translate into js.
-    x_slider = slider3d(animation_scene, vector(-1,-1,0), vector(1,-1,0), -4, 4, 'y gradient')
+    x_slider = slider3d(animation_scene, vector(-1,-1,0), vector(1,-1,0), -4, 4, 'x gradient')
 
-    #x_slider not suppoed to be visible initally
+    #x_slider not suppoed to be visible initally, only after interacting with y_slider
 
     x_slider.body.visible = False
     x_slider.slide.visible = False
