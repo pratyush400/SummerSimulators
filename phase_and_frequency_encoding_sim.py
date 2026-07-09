@@ -10,6 +10,7 @@ pointer_list = [] #list to store magentic pointers
 button_list = []
 slider_list = []
 arrow_list = [] #list to store the memory arrows for the picture function
+label_list = [] #list of all the average value calculation objects
 
 x_grad = 0
 y_grad = 0
@@ -64,7 +65,7 @@ control_panel = canvas(
 
 title = label(
     canvas=animation_scene,
-    pos=vector(0, 1.2, 0),
+    pos=vector(0, 1.1, 0),
     text="Investigating Phase and Frequency Encoding",
     height=25,
     color=color.black,
@@ -272,6 +273,61 @@ class slider3d:
         #move
         self.slide.pos = self.start_pos + (self.axis * loc_percentage) + vector(0,0,.04)
 
+class average_label:
+    
+    def __init__(self, pos, targets):
+
+        self.targets = targets
+
+        self.value = 0
+
+        #caculate value based on the average value of the targets
+        for target in targets:
+            target.calculate_frequency()
+            self.value += target.frequency
+        
+        self.value = self.value / len(targets)
+
+        self.position = pos
+
+        #create main structure of the average
+        self.body = box(
+            canvas = animation_scene,
+            pos = self.position,
+            length = .4,
+            height = .2,
+            width = .001,
+            color = vector(0.5,0.5,0.5),
+
+            shininess = 0,
+            opacity = 0.3,
+        )
+
+        #create text
+        self.text = label(
+            canvas = animation_scene,
+            pos = self.position + vector(0, 0, 0.02),
+            text = f'average frequency = {self.value}',
+            height = 10,
+            color = color.black,
+
+            box = False,
+            opacity = 0
+        )
+
+        label_list.append(self)
+
+    def update(self):
+        
+        self.value = 0
+
+        for target in self.targets:
+            target.calculate_frequency()
+            self.value += target.frequency
+        
+        self.value = self.value / len(self.targets)
+
+        self.text.text = f'average frequency = {self.value:.4f}'
 
 
 
@@ -505,20 +561,48 @@ def reset_button_clicked_arrow_memory(button):
 def Run():
 
     #-------------------Set up animation canvas---------------#
+    animation_scene.select()
 
-    magnetic_pointer(vector(-0.6, -0.6, 0))
-    magnetic_pointer(vector( 0.0, -0.6, 0))
-    magnetic_pointer(vector( 0.6, -0.6, 0))
+    #bottom row
+    pointer1 = magnetic_pointer(vector(-0.6, -0.6, 0))
+    pointer2 = magnetic_pointer(vector( 0.0, -0.6, 0))
+    pointer3 = magnetic_pointer(vector( 0.6, -0.6, 0))
 
-    magnetic_pointer(vector(-0.6,  0.0, 0))
-    magnetic_pointer(vector( 0.0,  0.0, 0))
-    magnetic_pointer(vector( 0.6,  0.0, 0))
+    #middle row
+    pointer4 = magnetic_pointer(vector(-0.6,  0.0, 0))
+    pointer5 = magnetic_pointer(vector( 0.0,  0.0, 0))
+    pointer6 = magnetic_pointer(vector( 0.6,  0.0, 0))
 
-    magnetic_pointer(vector(-0.6,  0.6, 0))
-    magnetic_pointer(vector( 0.0,  0.6, 0))
-    magnetic_pointer(vector( 0.6,  0.6, 0))
+    #top row
+    pointer7 = magnetic_pointer(vector(-0.6,  0.6, 0))
+    pointer8 = magnetic_pointer(vector( 0.0,  0.6, 0))
+    pointer9 = magnetic_pointer(vector( 0.6,  0.6, 0))
+
+    #create averages forcollumns
+    average_label(vector(-.6,.8,0),[pointer1, pointer4, pointer7])
+    average_label(vector(0,.8,0),[pointer2, pointer5, pointer8])
+    average_label(vector(.6,.8,0),[pointer3, pointer6, pointer9])
+
+    #create averages for rows
+    average_label(vector(-.8,-.6,0),[pointer1, pointer2, pointer3])
+    average_label(vector(-.8,0,0),[pointer4, pointer5, pointer6])
+    average_label(vector(-.8,.6,0),[pointer7, pointer8, pointer9])    
+
+    #create sliders
+    #do not break sliders (or any class for that matter) into multiple lines, this breaks glowscripts ability to translate into js.
+    x_slider = slider3d(animation_scene, vector(-1,-1,0), vector(1,-1,0), -4, 4, 'x gradient')
+
+    #x_slider not suppoed to be visible initally, only after interacting with y_slider
+
+    x_slider.body.visible = False
+    x_slider.slide.visible = False
+    x_slider.label.visible = False
+
+    y_slider = slider3d(animation_scene, vector(-2,-.7,0), vector(-2,.7,0), -4, 4, 'y gradient')
 
     #--------------------Set up control panel------------------#
+
+    control_panel.select()
 
     #create play/pause
     button(control_panel, vector(-3,0,0), 'Play/Pause', '⏯', start_button_clicked)
@@ -537,19 +621,7 @@ def Run():
     button(control_panel, vector(0,0,0), 'Reset arrow memory', '⟳', reset_button_clicked_arrow_memory)
 
 
-    animation_scene.select()
-
-    #create sliders
-    #do not break sliders (or any class for that matter) into multiple lines, this breaks glowscripts ability to translate into js.
-    x_slider = slider3d(animation_scene, vector(-1,-1,0), vector(1,-1,0), -4, 4, 'x gradient')
-
-    #x_slider not suppoed to be visible initally, only after interacting with y_slider
-
-    x_slider.body.visible = False
-    x_slider.slide.visible = False
-    x_slider.label.visible = False
-
-    y_slider = slider3d(animation_scene, vector(-2,-.7,0), vector(-2,.7,0), -4, 4, 'y gradient')
+    #running program
 
     while True:
 
@@ -577,6 +649,9 @@ def Run():
 
                 s.move()
             s.update_value()
+        
+        for l in label_list:
+            l.update()
 
 #----------------------------Start the sim----------------------------#
 
