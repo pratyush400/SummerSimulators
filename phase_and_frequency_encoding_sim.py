@@ -182,6 +182,9 @@ class magnetic_pointer:
             0
         )
 
+        if self.theta >= 2*pi:
+            self.theta = self.theta - (2*pi)
+
     def calculate_frequency(self):
 
         B = self.calculate_magnetic_field()
@@ -294,7 +297,7 @@ class average_label:
         self.body = box(
             canvas = animation_scene,
             pos = self.position,
-            length = .4,
+            length = .5,
             height = .2,
             width = .001,
             color = vector(0.5,0.5,0.5),
@@ -306,7 +309,7 @@ class average_label:
         #create text
         self.text = label(
             canvas = animation_scene,
-            pos = self.position + vector(0, 0, 0.02),
+            pos = self.position + vector(0, .04, 0.02),
             text = f'average frequency = {self.value}',
             height = 10,
             color = color.black,
@@ -327,7 +330,7 @@ class average_label:
         
         self.value = self.value / len(self.targets)
 
-        self.text.text = f'average frequency = {self.value:.4f}'
+        self.text.text = f'average frequency \n {self.value:.4f}'
 
 
 
@@ -579,14 +582,14 @@ def Run():
     pointer9 = magnetic_pointer(vector( 0.6,  0.6, 0))
 
     #create averages forcollumns
-    average_label(vector(-.6,.8,0),[pointer1, pointer4, pointer7])
-    average_label(vector(0,.8,0),[pointer2, pointer5, pointer8])
-    average_label(vector(.6,.8,0),[pointer3, pointer6, pointer9])
+    average_label(vector(-.6,.9,0),[pointer1, pointer4, pointer7])
+    average_label(vector(0,.9,0),[pointer2, pointer5, pointer8])
+    average_label(vector(.6,.9,0),[pointer3, pointer6, pointer9])
 
     #create averages for rows
-    average_label(vector(-.8,-.6,0),[pointer1, pointer2, pointer3])
-    average_label(vector(-.8,0,0),[pointer4, pointer5, pointer6])
-    average_label(vector(-.8,.6,0),[pointer7, pointer8, pointer9])    
+    average_label(vector(-1,-.6,0),[pointer1, pointer2, pointer3])
+    average_label(vector(-1,0,0),[pointer4, pointer5, pointer6])
+    average_label(vector(-1,.6,0),[pointer7, pointer8, pointer9])    
 
     #create sliders
     #do not break sliders (or any class for that matter) into multiple lines, this breaks glowscripts ability to translate into js.
