@@ -112,8 +112,9 @@ class magnetic_pointer:
         self.frequency = 0
 
 
-        #this is horrable, and unreadable but glowscript requires it
+        #this is horrable, and unreadable but glowscript requires it to be one line
         #i have included a readable version below
+        #note: readable version needs updating, but the basic structure is there
 
         self.text_representation = [box(canvas=animation_scene, pos=self.position + vector(0, 0, .1), length=.5, height=.5, width=.001, color=vector(0.5,0.5,0.5), shininess=0, opacity=1, visible=False), label(canvas=animation_scene, text='frequency =', pos=self.position + vector(0,0.15,.11), height=12, depth=0.02, color=color.black, box = False, opacity=0, visible=False), label(canvas=animation_scene, text='angle = ', pos=self.position+vector(0,-0.1,.11), height = 12, depth=0.02, color=color.black, box=False, opacity=0, visible=False)]
         #self.text_representation = [box(canvas = animation_scene,pos=self.position, length=.3, height=.3, width=.001, color=vector(0.5,0.5,0.5), shininess=0, opacity=0.3, visible=False), label(canvas=animation_scene, text='frequency', pos=self.position+vector(0,.01,0), height=0.08, depth=0.004, color=color.black, visible=False), label(canvas=animation_scene, text='angle', pos=self.position+vector(0,-.01,0), height=0.08, depth=0.004, color=color.black, visible=False)]
@@ -162,7 +163,8 @@ class magnetic_pointer:
 
         #B = background_field + (x_pos * x_gradient) + (y_pos * x_gradient)
 
-        B = 6
+        B = 3
+
         if gradient_active:
             B += (slider_list[0].current_value * self.position.x) + (slider_list[1].current_value * self.position.y)
 
@@ -173,7 +175,8 @@ class magnetic_pointer:
     def rotate_self(self):
 
         B = self.calculate_magnetic_field()
-        angular_velocity = pi/180 * B
+        #use factor to adjust rotation speed to be accurate to real MRI, note 1 second real time = .1ms simulation time
+        angular_velocity = ( ( ( ( 2 * pi ) * 4.2 ) / 3) * B)/60
 
         self.theta = self.theta + angular_velocity
         self.pointer.axis = vector(
@@ -189,7 +192,7 @@ class magnetic_pointer:
 
         B = self.calculate_magnetic_field()
 
-        angular_velocity = pi/180 * B
+        angular_velocity = ( ( ( ( 2 * pi ) * 4.4 ) / 3) * B)
 
         self.frequency = angular_velocity / (2*pi)
 
@@ -459,6 +462,11 @@ def click_event_anim(event):
         if s.is_clicked(click_pos):
             s.dragging = True
 
+            #automattically turn the gradient on when the slider is moved
+            if not gradient_active:
+                button_list[1].clicked()
+
+
             #allow x_slide to appear after the y_slider used
             for obj in slider_list:
                 obj.body.visible = True
@@ -498,6 +506,15 @@ def take_picture(button):
 
         m.text_representation[1].text =f"Frequency = \n {m.calculate_frequency():.4f} Hz"
         m.text_representation[2].text =f"Theta = \n {m.theta:.4f} rad"
+        #blueshift
+        if m.calculate_magnetic_field() > 3:
+
+            m.text_representation[0].color = vector(0, .1, 0) + vector(0, 0, m.calculate_frequency()/4.4)
+
+        else if m.calculate_magnetic_field() < 3: #redshift
+
+            m.text_representation[0].color = vector(0, .1, 0) + vector(m.calculate_frequency()/4.4, 0, 0)
+
 
         for j in m.text_representation:
 
