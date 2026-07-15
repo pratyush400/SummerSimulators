@@ -27,9 +27,9 @@ gradient_active = False
 # scene = canvas(width=0, height=0)
 
 link = document.createElement("a")
-link.href = "https://www.glowscript.org"
+link.href = "https://medicalimaging.watzekdi.net/images/mri_images/Slice%20Selection/Background-Phase%26FreqEncoding_new.png"
 link.target = "_blank"
-link.innerHTML = "GlowScript"
+link.innerHTML = "Background"
 
 document.body.prepend(link)
 
@@ -45,7 +45,7 @@ animation_scene = canvas(
     userspin = False
 )
 
-animation_scene.range = 1.3
+animation_scene.range = 1.5
 animation_scene.lights = []
 distant_light(direction = vector( 0.22, 0.44, 0.88), color = color.white)
 distant_light(direction = vector(-0.88, -0.22, -0.44), color = color.white)
@@ -502,16 +502,20 @@ def gradient_button(button):
 
 def take_picture(button):
 
+    global arrow_list
+
     for i, m in enumerate(pointer_list):
 
         m.text_representation[1].text =f"Frequency = \n {m.calculate_frequency():.4f} Hz"
         m.text_representation[2].text =f"Theta = \n {m.theta:.4f} rad"
+
         #blueshift
         if m.calculate_magnetic_field() > 3:
 
             m.text_representation[0].color = vector(0, .1, 0) + vector(0, 0, m.calculate_frequency()/4.4)
 
-        else if m.calculate_magnetic_field() < 3: #redshift
+        #redshift
+        else if m.calculate_magnetic_field() < 3: 
 
             m.text_representation[0].color = vector(0, .1, 0) + vector(m.calculate_frequency()/4.4, 0, 0)
 
@@ -525,8 +529,9 @@ def take_picture(button):
                 j.visible = False
 
 
-    #create thea arrows for visual representation
+    #create the arrows for visual representation
     if button.on == True:
+
         for m in pointer_list:
             arrow_list.append(
                 arrow(
@@ -569,7 +574,7 @@ def reset_button_clicked_arrow_memory(button):
         a.visible = False
     
     arrow_list = []    
-    button.box.color=vector (.5,.5,.5)
+    button.box.color = vector (.5,.5,.5)
 
 
 
