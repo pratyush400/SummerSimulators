@@ -65,7 +65,7 @@ control_panel = canvas(
 
 title = label(
     canvas=animation_scene,
-    pos=vector(0, 1.1, 0),
+    pos=vector(0, 1.3, 0),
     text="Investigating Phase and Frequency Encoding",
     height=25,
     color=color.black,
@@ -494,11 +494,11 @@ def start_button_clicked(button):
 
     Animation_playing = not Animation_playing
 
-def gradient_button(button):
+# def gradient_button(button):
 
-    global gradient_active
+#     global gradient_active
 
-    gradient_active = not gradient_active
+#     gradient_active = not gradient_active
 
 def take_picture(button):
 
@@ -567,6 +567,10 @@ def reset_button_clicked_sliders(button):
 
     button.box.color = vector(.5, .5, .5)
 
+    global gradient_active
+
+    gradient_active = False
+
 def reset_button_clicked_arrow_memory(button):
     global arrow_list
 
@@ -604,14 +608,14 @@ def Run():
     pointer9 = magnetic_pointer(vector( 0.6,  0.6, 0))
 
     #create averages forcollumns
-    average_label(vector(-.6,.9,0),[pointer1, pointer4, pointer7])
-    average_label(vector(0,.9,0),[pointer2, pointer5, pointer8])
-    average_label(vector(.6,.9,0),[pointer3, pointer6, pointer9])
+    average_label(vector(-.6,1,0),[pointer1, pointer4, pointer7])
+    average_label(vector(0,1,0),[pointer2, pointer5, pointer8])
+    average_label(vector(.6,1,0),[pointer3, pointer6, pointer9])
 
     #create averages for rows
-    average_label(vector(-1,-.6,0),[pointer1, pointer2, pointer3])
-    average_label(vector(-1,0,0),[pointer4, pointer5, pointer6])
-    average_label(vector(-1,.6,0),[pointer7, pointer8, pointer9])    
+    average_label(vector(-1.4,-.6,0),[pointer1, pointer2, pointer3])
+    average_label(vector(-1.4,0,0),[pointer4, pointer5, pointer6])
+    average_label(vector(-1.4,.6,0),[pointer7, pointer8, pointer9])    
 
     #create sliders
     #do not break sliders (or any class for that matter) into multiple lines, this breaks glowscripts ability to translate into js.
@@ -632,10 +636,10 @@ def Run():
     #create play/pause
     button(control_panel, vector(-3,0,0), 'Play/Pause', '⏯', start_button_clicked)
 
-    #create button to control gradient state
-    button(control_panel, vector(-2,0,0), 'Activate gradient', '⏯', gradient_button)
+    #create button to control gradient state, now no longer in use, preserve in case of future necesity
+    #button(control_panel, vector(-2,0,0), 'Activate gradient', '⏯', gradient_button)
 
-    button(control_panel, vector(-1,0,0), 'Picture', '📷', take_picture)
+    button(control_panel, vector(-2,0,0), 'Picture', '📷', take_picture)
 
     #create spinner reset
     button(control_panel, vector(3,0,0), 'Reset Pointers', '⟳', reset_button_clicked_pointers)
@@ -643,7 +647,7 @@ def Run():
     #create slider reset
     button(control_panel, vector(2,0,0), 'Reset Gradient', '⟳', reset_button_clicked_sliders)
 
-    button(control_panel, vector(0,0,0), 'Reset arrow memory', '⟳', reset_button_clicked_arrow_memory)
+    button(control_panel, vector(1, 0,0), 'Reset arrow memory', '⟳', reset_button_clicked_arrow_memory)
 
 
     #running program
