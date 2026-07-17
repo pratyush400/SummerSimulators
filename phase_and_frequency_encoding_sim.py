@@ -117,42 +117,40 @@ class magnetic_pointer:
         #note: readable version needs updating, but the basic structure is there
 
         self.text_representation = [box(canvas=animation_scene, pos=self.position + vector(0, 0, .1), length=.5, height=.5, width=.001, color=vector(0.5,0.5,0.5), shininess=0, opacity=1, visible=False), label(canvas=animation_scene, text='frequency =', pos=self.position + vector(0,0.15,.11), height=12, depth=0.02, color=color.black, box = False, opacity=0, visible=False), label(canvas=animation_scene, text='angle = ', pos=self.position+vector(0,-0.1,.11), height = 12, depth=0.02, color=color.black, box=False, opacity=0, visible=False)]
-        #self.text_representation = [box(canvas = animation_scene,pos=self.position, length=.3, height=.3, width=.001, color=vector(0.5,0.5,0.5), shininess=0, opacity=0.3, visible=False), label(canvas=animation_scene, text='frequency', pos=self.position+vector(0,.01,0), height=0.08, depth=0.004, color=color.black, visible=False), label(canvas=animation_scene, text='angle', pos=self.position+vector(0,-.01,0), height=0.08, depth=0.004, color=color.black, visible=False)]
 
         # self.text_representation = [
-        #     background = box(
-        #         canvas = animation_scene,
-        #         pos = self.position,
-        #         length = .3,
-        #         height = .3,
-        #         width = .001,
-        #         color = vector(0.5,0.5,0.5),
-
-        #         shininess = 0,
-        #         opacity = 0.3,
-        #         visible = False
+        #     box(
+        #         canvas=animation_scene,
+        #         pos=self.position + vector(0, 0, .1),
+        #         length=.5,
+        #         height=.5,
+        #         width=.001,
+        #         color=vector(0.5, 0.5, 0.5),
+        #         shininess=0,
+        #         opacity=1,
+        #         visible=False
         #     ),
-        #     frequency_text = label(
-        #         canvas = animation_scene,
-        #         text = 'frequency',
-
-        #         pos = self.position + vector(0,.01,0),
-        #         height = 0.08,
-        #         depth = 0.004,
-        #         color = color.black,
-
-        #         visible = False
+        #     label(
+        #         canvas=animation_scene,
+        #         text='frequency =',
+        #         pos=self.position + vector(0, 0.15, .11),
+        #         height=12,
+        #         depth=0.02,
+        #         color=color.black,
+        #         box=False,
+        #         opacity=0,
+        #         visible=False
         #     ),
-        #     angle_text = label(
-        #         canvas = animation_scene,
-        #         text = 'angle',
-        #         pos = self.position + vector(0,-.01,0),
-
-        #         height = 0.08,
-        #         depth = 0.004,
-        #         color = color.black,
-
-        #         visible = False
+        #     label(
+        #         canvas=animation_scene,
+        #         text='angle = ',
+        #         pos=self.position + vector(0, -0.1, .11),
+        #         height=12,
+        #         depth=0.02,
+        #         color=color.black,
+        #         box=False,
+        #         opacity=0,
+        #         visible=False
         #     )
         # ]
 
@@ -175,8 +173,8 @@ class magnetic_pointer:
     def rotate_self(self):
 
         B = self.calculate_magnetic_field()
-        #use factor to adjust rotation speed to be accurate to real MRI, note 1 second real time = .1ms simulation time
-        angular_velocity = ( ( ( ( 2 * pi ) * 4.2 ) / 3) * B)/60
+        #use factor to adjust rotation speed to be accurate to real MRI, note 1 second real time = .01ms simulation time
+        angular_velocity = ( ( ( ( 2 * pi ) * .42 ) / 3) * B)/60
 
         self.theta = self.theta + angular_velocity
         self.pointer.axis = vector(
@@ -192,7 +190,7 @@ class magnetic_pointer:
 
         B = self.calculate_magnetic_field()
 
-        angular_velocity = ( ( ( ( 2 * pi ) * 4.4 ) / 3) * B)
+        angular_velocity = ( ( ( ( 2 * pi ) * .42 ) / 3) * B)
 
         self.frequency = angular_velocity / (2*pi)
 
@@ -313,7 +311,7 @@ class average_label:
         self.text = label(
             canvas = animation_scene,
             pos = self.position + vector(0, .04, 0.02),
-            text = f'average frequency = {self.value}',
+            text = f'ν \n{self.value}',
             height = 10,
             color = color.black,
 
@@ -333,7 +331,7 @@ class average_label:
         
         self.value = self.value / len(self.targets)
 
-        self.text.text = f'average frequency \n {self.value:.4f}'
+        self.text.text = f'ν \n {self.value:.4f}'
 
 
 
@@ -514,12 +512,16 @@ def take_picture(button):
         #blueshift
         if m.calculate_magnetic_field() > 3:
 
-            m.text_representation[0].color = vector(0, .1, 0) + vector(0, 0, m.calculate_frequency()/4.4)
+            m.text_representation[0].color = vector(0, .1, 0) + vector(0, 0, m.calculate_frequency()/.42)
 
         #redshift
         else if m.calculate_magnetic_field() < 3: 
 
-            m.text_representation[0].color = vector(0, .1, 0) + vector(m.calculate_frequency()/4.4, 0, 0)
+            m.text_representation[0].color = vector(0, .1, .1) + vector(m.calculate_frequency()/.42, 0, 0)
+
+        else if m.calculate_magnetic_field() == 3:
+
+            m.text_representation[0].color = vector(.1, 0, .1) + vector(0, m.calculate_frequency()/.42, 0)
 
 
         for j in m.text_representation:
@@ -623,7 +625,7 @@ def Run():
 
     #create sliders
     #do not break sliders (or any class for that matter) into multiple lines, this breaks glowscripts ability to translate into js.
-    x_slider = slider3d(animation_scene, vector(-1,-1,0), vector(1,-1,0), -4, 4, 'x gradient')
+    x_slider = slider3d(animation_scene, vector(-1,-1,0), vector(1,-1,0), -3, 3, 'x gradient')
 
     #x_slider not suppoed to be visible initally, only after interacting with y_slider
 
@@ -631,7 +633,7 @@ def Run():
     x_slider.slide.visible = False
     x_slider.label.visible = False
 
-    y_slider = slider3d(animation_scene, vector(-2,-.7,0), vector(-2,.7,0), -4, 4, 'y gradient')
+    y_slider = slider3d(animation_scene, vector(-2,-.7,0), vector(-2,.7,0), -3, 3, 'y gradient')
 
     #--------------------Set up control panel------------------#
 
