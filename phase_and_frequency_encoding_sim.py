@@ -348,10 +348,6 @@ class button:
 
         self.position = position
 
-        self.title_text = text
-
-        self.icon_text = icon
-
         #self.action keeps track of the purpose of the button so it can have behavior when clicked
         self.action = action
 
@@ -372,7 +368,7 @@ class button:
         self.icon = label(
             canvas = chosen_canvas,
             pos = position,
-            text = self.icon_text,
+            text = icon,
             height = 20,
             color = color.black,
 
@@ -384,7 +380,7 @@ class button:
         self.title = label(
             canvas = chosen_canvas,
             pos = position + vector(0, -.25, 0),
-            text = self.title_text,
+            text = text,
             height = 12,
             color = color.black,
 
@@ -453,7 +449,7 @@ def click_event_ctrl(event):
 
 def click_event_anim(event):
 
-    global x_slider
+    global gradient_active
 
     click_pos = event.pos
 
@@ -464,7 +460,7 @@ def click_event_anim(event):
 
             #automattically turn the gradient on when the slider is moved
             if not gradient_active:
-                button_list[1].clicked()
+                gradient_active = True
 
 
             #allow x_slide to appear after the y_slider used
@@ -493,6 +489,12 @@ def start_button_clicked(button):
     global Animation_playing
 
     Animation_playing = not Animation_playing
+
+    if button.on == True:
+        button_list[0].title.text = 'Pause'
+
+    if button.on == False:
+        button_list[0].title.text = 'Play'
 
 # def gradient_button(button):
 
@@ -531,6 +533,8 @@ def take_picture(button):
 
     #create the arrows for visual representation
     if button.on == True:
+
+        reset_arrow_memoryow_memory()
 
         for m in pointer_list:
             arrow_list.append(
@@ -571,14 +575,14 @@ def reset_button_clicked_sliders(button):
 
     gradient_active = False
 
-def reset_button_clicked_arrow_memory(button):
+def reset_arrow_memoryow_memory():
+    
     global arrow_list
 
     for a in arrow_list:
         a.visible = False
     
-    arrow_list = []    
-    button.box.color = vector (.5,.5,.5)
+    arrow_list = []
 
 
 
@@ -634,7 +638,7 @@ def Run():
     control_panel.select()
 
     #create play/pause
-    button(control_panel, vector(-3,0,0), 'Play/Pause', '⏯', start_button_clicked)
+    button(control_panel, vector(-3,0,0), 'Play', '⏯', start_button_clicked)
 
     #create button to control gradient state, now no longer in use, preserve in case of future necesity
     #button(control_panel, vector(-2,0,0), 'Activate gradient', '⏯', gradient_button)
@@ -646,8 +650,6 @@ def Run():
 
     #create slider reset
     button(control_panel, vector(2,0,0), 'Reset Gradient', '⟳', reset_button_clicked_sliders)
-
-    button(control_panel, vector(1, 0,0), 'Reset arrow memory', '⟳', reset_button_clicked_arrow_memory)
 
 
     #running program
