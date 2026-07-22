@@ -1,8 +1,6 @@
 Web VPython 3.2
 from vpython import *
 #Web VPython 3.2
-from vpython import *
-#Web VPython 3.2
 
 from vpython import *
 from random import choice
@@ -38,7 +36,7 @@ remember_speed = animation_speed
 E = 20 #Energy in keV
 Z = 7.4 #Starting atomic number
 theta = pi/15
-text_size = 15
+text_size=15 
 started = False #Set to true when simulation first starts (see Run())
 started_atomic = False #Used if user hits switch to target view before simulation done and prints warning (see SwitchView() if and else lines)
 propagating = False
@@ -52,7 +50,7 @@ PE_dropElectronLoc = vector((-104/1025)*scene.width,(10/513)*scene.height,0)
 PE_scatterElectronLoc = vector((-70/1025)*scene.width,(-31/513)*scene.height,0)
 
 # SETTING UP COMPTON ELECTRON RANDOMNESS
-# seeting compton election starting positions
+# seeting comptom election starting positions
 bottom_left = vector((-63/1025)*scene.width,(-153/513)*scene.height,0)
 top_left = vector((-63/1470)*scene.width,(145/590)*scene.height,0)
 bottom_right = vector((40/1000)*scene.width,(-160/500)*scene.height,0)
@@ -92,465 +90,60 @@ remember_m_index = 0
 
 #Objects
 
-# compton text
-lbl_compton = label(
-    pos=vector(0, scene.height/2 - 70,0), 
-    text="Compton Scattering", 
-    font="helvetica", 
-    box=False, 
-    canvas=scene, 
-    color=vec(0, 0, 0), 
-    height=text_size, 
-    visible=False, 
-    opacity=0
-    )
+# compton text 
+lbl_compton=label(pos=vector(0, scene.height/2 - 70, 0),text="Compton Electron", font="helvetica", box=False,canvas=scene, color=vec(0, 0, 0), height=text_size,visible=False, opacity=0)
 
 
-#this is the button at the upper middle portion of the screen that takes you to the "atomic" view -jc
-lbl_start1 = label( 
-    pos = vector(0, scene.height/2,0),
-    text = "Click for mechanistic view!",
-    font = "helvetica",
-    box = True,
-    canvas = scene,
-    color = vec(0.000, 0.360, 0.390),
-    height = text_size,
-    visible = True,
-    opacity=0
-    )
+#Photoelectric text
+lbl_PE=label(pos=vector(0, scene.height/2 - 70, 0),text="Photoelectric Effect", font="helvetica", box=False,canvas=scene, color=color.black, height=text_size,visible=False, opacity=0)
 
-# this is the button that returns to target view-jc
-lbl_start2 = label(
-    pos = vector(0,
-    scene.height/2,0),
-    text = "Return to target view!",
-    font = "helvetica",
-    box = True,
-    canvas = scene,
-    color = vec(0.000, 0.360, 0.390),
-    height = text_size,
-    visible = False,
-    opacity = 0
-    )
 
-#unsure what this is, keep looking for information -jc
-medium_box = box(
-    pos = vector(atoms_loc/2,-2.5*text_size,0),
-    height = scene.height/1.5, width=scene.width/10,
-    length = scene.width/30, color=color.black,
-    opacity = 0.25,
-    visible = False
-    )
-
-#unsure what this is, keep looking -jc
-medium_label = text(
-    pos = medium_box.pos + vector(-20,(medium_box.height/2.3),-50),
-    text = 'Sample',
-    font = "sans",
-    box = False,
-    canvas = scene,
-    axis = vector(5,0.1,10),
-    color = vec(0.622, 0.779, 0.847),
-    height = 1.5*text_size,
-    visible = False
-    )
-
+lbl_start1=label(pos=vector(0, scene.height/2,0), text="Click for mechanistic view!", font="helvetica", box=True, canvas=scene, color=vec(0.000, 0.360, 0.390), height=text_size, visible=True, opacity=0)
+lbl_start2=label(pos=vector(0, scene.height/2,0), text="Return to target view!", font="helvetica", box=True, canvas=scene, color=vec(0.000, 0.360, 0.390), height=text_size, visible=False, opacity=0)
+medium_box = box(pos=vector(atoms_loc/2,-2.5*text_size,0), height=scene.height/1.5, width=scene.width/10, length=scene.width/30, color=color.black, opacity=0.25, visible=False)
+medium_label = text(pos=medium_box.pos + vector(-20,(medium_box.height/2.3),-50), text='Sample', font="sans", box=False, canvas=scene, axis=vector(5,0.1,10), color=vec(0.622, 0.779, 0.847), height=1.5*text_size, visible=False)
 #BAS Source is a curve and box is invisible
-my_CS_atomic = box( #unsure what this is, keep looking -jc
-    pos = vector(0,-2*text_size,0),
-    height = scene.width/2,
-    length = scene.width/2,
-    width = 1,
-    texture = url,
-    color = color.white,
-    opacity = 1,
-    visible = False
-    )
-
-#This is the box that holds the sprite for the atom in the photoelectric effect -jc
-my_PE_atomic = box( 
-    pos = vector(0,-2*text_size,0),
-    height = scene.width/2,
-    length = scene.width/2,
-    width = 1,
-    texture = "https://i.imgur.com/Pc2apHh.png",
-    color = color.white,
-    opacity = 1,
-    visible = False
-    )
-
-#This is the atomic image for the compton effect animation -jc
-my_trans_atomic= box(
-    pos = vector(0,-2*text_size,0),
-    height = scene.width/2,
-    length = scene.width/2,
-    width = 1,
-    texture = "https://i.imgur.com/rhxqQqy.png",
-    color = color.white,
-    opacity = 1,
-    visible = False
-    )
-
-#This is just an arry for the three images, most likely to call in a later function, but it seems redundant, check if we can remove later -jc
-my_mech_atomic_list=[
-    my_PE_atomic,
-    my_CS_atomic,
-    my_trans_atomic
-    ]
-
-#this sets up the different vectors for the atomic view -jc
-probability_list=[
-    vector(350,-50,0),
-    vector(750,-50,0),
-    vector(750,50,0),
-    vector(350,50,0),
-    vector(350,-50,0)
-    ]
-
-probability_box = curve(
-    pos=probability_list,
-    color=color.black,
-    radius=2,
-    visible=True,
-    origin=vector(0,-50,0)
-    )
-
-#This is a strange list, all the values in the x axis are negitive. Intuitively i would assume that these posistions are off the scene -jc
-#current hypothisis is that this is the locations that the incoming x-rays interact with the electrons -jc
-xray_source_list=[
-    3*vector(-atoms_loc-180,0,0),
-    3*vector(-atoms_loc-190,0,0),
-    3*vector(-atoms_loc-190,-5,0),
-    3*vector(-atoms_loc-220,-5,0),
-    3*vector(-atoms_loc-220,10,0),
-    3*vector(-atoms_loc-190,10,0),
-    3*vector(-atoms_loc-190,5,0),
-    3*vector(-atoms_loc-180,5,0),
-    3*vector(-atoms_loc-180,0,0)
-    ]
-
-#Creates the empty space for the electrons that moved, notably does not define posistion
-xray_source_new=curve(
-    pos = xray_source_list,
-    radius = 2,
-    color = color.black,
-    origin = vector(1530,-50,0)
-    )
-
-xray_source = box(
-    pos=vector(-atoms_loc,0,0),
-    height=scene.height/30,
-    width=3*scene.width/50,
-    length=scene.width/50,
-    color=color.black,
-    opacity=0
-    )
-
-xray_label = label(
-    pos=xray_source.pos + vector(-100,xray_source.height,0),
-    text='X-ray Source',
-    font="helvetica",
-    box=False,
-    canvas=scene,
-    color=color.black,
-    height=text_size,
-    opacity=0
-    )
-
-detector_box = box(
-    pos=vector(medium_box.pos.x + medium_box.length + scene.width/2,0,0),
-    height=scene.height,
-    width=scene.width/5,
-    length=1,
-    color=vector(0.5,0.5,0.5),
-    opacity=0.2,
-    visible=False
-    )
-
-detector_label = text(
-    pos=detector_box.pos+vector(0,detector_box.height/2.5,-50),
-    text='Detector',
-    font="sans",
-    box=False,
-    canvas=scene,
-    axis=vector(0.5,0.1,5),
-    color=vec(0.622, 0.779, 0.847),
-    height=1.5*text_size,
-    visible=False
-    )
-
-atomic_viewBox = box(
-    pos=vector(0, scene.height/2,0),
-    length=0.6*scene.width/4,
-    height=0.6*scene.width/4,
-    width=1,
-    texture="https://webdev2.watzek.cloud/~nddill/scanningSims/images/projection_Radiography/PEmech_icon_small.png",
-    opacity=1,
-    shininess = 0,
-    color=color.white,
-    visible=False
-    )
-
-atomic_view_lbl = label(
-    pos=atomic_viewBox.pos + vector(0,(atomic_viewBox.height/2-7*text_size),0),
-    text='Atomic View',
-    font="helvetica",
-    box=False,
-    canvas=scene,
-    color=vector(0,0,0.8),
-    height=text_size,
-    opacity=0,
-    visible=False
-    )
-
-PE_scatterElectron = sphere(
-    pos=PE_scatterElectronLoc,
-    radius=8,
-    color=color.cyan,
-    visible=False
-    )
-
-PE_dropElectron = sphere(
-    pos=PE_dropElectronLoc,
-    radius=8,
-    color=color.magenta,
-    visible=False
-    )
-
-atomic_label = label(
-    pos=vector(0,(-scene.height/2) + text_size,0),
-    text='Both the scattered electron and emited x-ray are absorbed by the medium',
-    font="helvetica",
-    box=False,
-    canvas=scene,
-    color=color.black,
-    height=text_size,
-    opacity=0,
-    visible=False
-    )
-
-my_mech_lbl= label(
-    pos=vector(-50,0,0),
-    text="CHOOSE A MECHANISM FROM THE CONTROL PANEL\n FOLLOWED BY PLAY/PAUSE!",
-    color=vector(0,0.36,0.39),
-    box=False,
-    opacity=0,
-    visible=False
-    )
-
-my_error_lbl = label(
-    pos=vector(-50,0,0),
-    text="ERROR: CHOOSE A MECHANISM FROM THE CONTROL PANEL\n FOLLOWED BY PLAY/PAUSE!",
-    color=vector(0,0.36,0.39),
-    box=False,
-    opacity=0,
-    visible=False
-    )
-
-my_error2_lbl =label(
-    pos=vector(-50,0,10),
-    text="ERROR: SWITCH TO MECHANISTIC VIEW FIRST!",
-    color=vector(0,0.36,0.39),
-    box=False,
-    opacity=0,
-    visible=False
-    )
-
-my_secondary_abs_lbl = label(
-    pos=vector(scene.width*(300/1024),100,0),
-    text="💥",
-    color=vector(0,0.36,0.39),
-    box=False,
-    opacity=0,
-    height=3*text_size,
-    visible=False
-    )
-
-my_secondary_abs_lbl2 = label(
-    pos=vector(scene.width*(300/1024),100-4*text_size,0),
-    text="Absorbed quickly!",
-    color=vector(0,0.36,0.39),
-    box=False,
-    opacity=0,
-    visible=False
-    )
-
-compton_electron = sphere(
-    pos=compton_electronLoc,
-    radius=8,
-    color=color.cyan,
-    visible=False
-    )
-
-my_electrons_list=[
-    PE_scatterElectron,
-    PE_dropElectron,
-    compton_electron
-    ]
-
-water = box(
-    pos=vector(0,-2*text_size,0),
-    length=scene.width/4,
-    height=1596/1224*scene.width/4,
-    width=1,
-    texture="https://i.imgur.com/QZSxqxP.png",
-    shininess=0,
-    visible = True,
-    color=color.white
-    )
-
-bone = box(
-    pos=vector(0,-2*text_size,0),
-    length=scene.width/4,
-    height=scene.width/4,
-    width=1,
-    texture="https://i.imgur.com/yAuZARI.png",
-    shininess=0,
-    visible = False,
-    color=color.white
-    )
-
-lead = box(
-    pos=vector(0,-2*text_size,0),
-    length=scene.width/4,
-    height=scene.width/4,
-    width=1,
-    texture="https://i.imgur.com/DkWsBWv.png",
-    shininess=0,
-    visible = False,
-    color=color.white
-    )
-
-my_targets_list=[
-    water,
-    bone,
-    lead
-    ]
-
-my_water_lbl=label(
-    pos=vector(0,water.height/2-text_size,0),
-    text='<b>WATER<b>',
-    box = False,
-    opacity=0,
-    color=vec(0,0.6,0.8),
-    visible=True
-    )
-
-my_bone_lbl=label(
-    pos=vector(0,water.height/2-text_size,0),
-    text='<b>BONE<b>',
-    box = False,
-    opacity=0,
-    color=vector(0.6,0.6,0.6),
-    visible=False
-    )
-
-my_lead_lbl=label(
-    pos=vector(0,water.height/2-text_size,0),
-    text='<b>LEAD<b>',
-    box = False,
-    opacity=0,
-    color=vector(0.3,0.3,0.3),
-    visible=False
-    )
-
-my_prob_lbl = label(
-    pos=vector(550, xray_label.pos.y+2*text_size,0),
-    text="<b>NUMBER OF EVENTS<b>",
-    color=vector(0,0.5,0.5),
-    box=False,
-    opacity=0
-    )
-
-my_PEtot_lbl = label(
-    pos=vector(probability_list[0].x+62, my_prob_lbl.pos.y-2*text_size,0),
-    text="<b>Photoelectric<b>",
-    color=vector(0,0.5,0.5),
-    height=0.85*text_size,
-    box=False,
-    opacity=0
-    )
-
-pe_tot_lbl = label(
-    pos=vector(probability_list[0].x+62, my_prob_lbl.pos.y-6.5*text_size,0),
-    color=vector(0,0.5,0.5),
-    height = 1.5*text_size,
-    box=False,
-    opacity=0
-    )
-
-my_TRtot_lbl = label(
-    pos=vector(probability_list[1].x-62, my_prob_lbl.pos.y-2*text_size,0),
-    text="<b>Transmission<b>",
-    height=0.85*text_size,
-    color=vector(0,0.5,0.5),
-    box=False,
-    opacity=0
-    )
-
-tr_tot_lbl = label(
-    pos=vector(probability_list[1].x-62, my_prob_lbl.pos.y-6.5*text_size,0),
-    color=vector(0,0.5,0.5),
-    height = 1.5*text_size,
-    box=False,
-    opacity=0
-    )
-
-my_CStot_lbl = label(
-    pos=vector((probability_list[0].x+probability_list[1].x)/2,my_prob_lbl.pos.y-2*text_size,0),
-    text="<b>Compton<b>",
-    height=0.85*text_size,
-    color=vector(0,0.5,0.5),
-    box=False,
-    opacity=0
-    )
-
-cs_tot_lbl = label(
-    pos=vector((probability_list[0].x+probability_list[1].x)/2, my_prob_lbl.pos.y-6.5*text_size,0),
-    color=vector(0,0.5,0.5),
-    height = 1.5*text_size,
-    box=False,
-    opacity=0
-    )
-
-element_names_list = [
-    my_water_lbl,
-    my_bone_lbl,
-    my_lead_lbl
-    ]
-
-pe_schem = box(
-    pos=vector(0,0,0),
-    length=scene.width/2,
-    height=scene.width/2,
-    width=0.5,
-    texture="https://webdev2.watzek.cloud/~nddill/scanningSims/images/projection_Radiography/PE.png",
-    shininess=0,
-    visible = False
-    )
-
-cs_schem = box(
-    pos=vector(0,0,0),
-    length=scene.width/2,
-    height=scene.width/2,
-    width=0.5,
-    texture="https://webdev2.watzek.cloud/~nddill/scanningSims/images/projection_Radiography/Compton.png",
-    shininess=0,
-    visible = False,
-    color=color.white
-    )
-
-trans_schem = box(
-    pos=vector(0,0,0),
-    length=scene.width/2,
-    height=scene.width/2,
-    width=0.5,
-    texture="https://webdev2.watzek.cloud/~nddill/scanningSims/images/projection_Radiography/Atom.png",
-    shininess=0,
-    visible = False,
-    color=color.white
-    )
-
+my_CS_atomic= box(pos=vector(0,-2*text_size,0), height=scene.width/2, length=scene.width/2, width=1, texture=url, color=color.white, opacity=1, visible=False)
+my_PE_atomic= box(pos=vector(0,-2*text_size,0), height=scene.width/2, length=scene.width/2, width=1, texture="https://i.imgur.com/Pc2apHh.png", color=color.white, opacity=1, visible=False)
+my_trans_atomic= box(pos=vector(0,-2*text_size,0), height=scene.width/2, length=scene.width/2, width=1, texture="https://i.imgur.com/rhxqQqy.png", color=color.black, opacity=1, visible=False)
+my_mech_atomic_list=[my_PE_atomic, my_CS_atomic, my_trans_atomic]
+probability_list=[vector(350,-50,0), vector(750,-50,0), vector(750,50,0), vector(350,50,0), vector(350,-50,0)]
+probability_box = curve(pos=probability_list, color=color.black, radius=2, visible=True, origin=vector(0,-50,0))
+xray_source_list=[3*vector(-atoms_loc-180,0,0), 3*vector(-atoms_loc-190,0,0), 3*vector(-atoms_loc-190,-5,0), 3*vector(-atoms_loc-220,-5,0), 3*vector(-atoms_loc-220,10,0), 3*vector(-atoms_loc-190,10,0), 3*vector(-atoms_loc-190,5,0), 3*vector(-atoms_loc-180,5,0), 3*vector(-atoms_loc-180,0,0)] 
+xray_source_new=curve(pos=xray_source_list, radius=2, color=color.black, origin=vector(1530,-50,0))
+xray_source = box(pos=vector(-atoms_loc,0,0), height=scene.height/30, width=3*scene.width/50, length=scene.width/50, color=color.black, opacity=0)
+xray_label = label(pos=xray_source.pos + vector(-100,xray_source.height,0), text='X-ray Source', font="helvetica", box=False, canvas=scene, color=color.black, height=text_size, opacity=0)
+detector_box = box(pos=vector(medium_box.pos.x + medium_box.length + scene.width/2,0,0), height=scene.height, width=scene.width/5, length=1, color=vector(0.5,0.5,0.5), opacity=0.2, visible=False)
+detector_label = text(pos=detector_box.pos+vector(0,detector_box.height/2.5,-50), text='Detector', font="sans", box=False, canvas=scene, axis=vector(0.5,0.1,5), color=vec(0.622, 0.779, 0.847), height=1.5*text_size, visible=False)
+atomic_viewBox = box(pos=vector(0, scene.height/2,0), length=0.6*scene.width/4, height=0.6*scene.width/4, width=1, texture="https://webdev2.watzek.cloud/~nddill/scanningSims/images/projection_Radiography/PEmech_icon_small.png", opacity=1, shininess = 0, color=color.white, visible=False)
+atomic_view_lbl = label(pos=atomic_viewBox.pos + vector(0,(atomic_viewBox.height/2-7*text_size),0), text='Atomic View', font="helvetica", box=False, canvas=scene, color=vector(0,0,0.8), height=text_size, opacity=0, visible=False)
+PE_scatterElectron = sphere(pos=PE_scatterElectronLoc, radius=8, color=color.cyan, visible=False)
+PE_dropElectron = sphere(pos=PE_dropElectronLoc, radius=8, color=color.magenta, visible=False)
+atomic_label = label(pos=vector(0,(-scene.height/2) + text_size,0), text='Both the scattered electron and emited x-ray are absorbed by the medium', font="helvetica", box=False, canvas=scene, color=color.black, height=text_size, opacity=0, visible=False)
+my_mech_lbl= label(pos=vector(-50,0,0), text="CHOOSE A MECHANISM FROM THE CONTROL PANEL\n FOLLOWED BY PLAY/PAUSE!", color=vector(0,0.36,0.39), box=False, opacity=0, visible=False)
+my_error_lbl = label(pos=vector(-50,0,0), text="ERROR: CHOOSE A MECHANISM FROM THE CONTROL PANEL\n FOLLOWED BY PLAY/PAUSE!", color=vector(0,0.36,0.39), box=False, opacity=0, visible=False)
+my_error2_lbl =label(pos=vector(-50,0,10), text="ERROR: SWITCH TO MECHANISTIC VIEW FIRST!", color=vector(0,0.36,0.39), box=False, opacity=0, visible=False)
+my_secondary_abs_lbl = label(pos=vector(scene.width*(300/1024),100,0), text="💥", color=vector(0,0.36,0.39), box=False, opacity=0, height=3*text_size, visible=False)
+my_secondary_abs_lbl2 = label(pos=vector(scene.width*(300/1024),100-4*text_size,0), text="Absorbed quickly!", color=vector(0,0.36,0.39), box=False, opacity=0, visible=False)
+compton_electron = sphere(pos=compton_electronLoc, radius=8, color=color.cyan, visible=False)
+my_electrons_list=[PE_scatterElectron, PE_dropElectron, compton_electron]
+water = box(pos=vector(0,-2*text_size,0), length=scene.width/4, height=1596/1224*scene.width/4, width=1, texture="https://i.imgur.com/QZSxqxP.png", shininess=0, visible = True, color=color.white)
+bone = box(pos=vector(0,-2*text_size,0), length=scene.width/4, height=scene.width/4, width=1, texture="https://i.imgur.com/yAuZARI.png", shininess=0, visible = False, color=color.white)
+lead =  box(pos=vector(0,-2*text_size,0), length=scene.width/4, height=scene.width/4, width=1, texture="https://i.imgur.com/DkWsBWv.png", shininess=0, visible = False, color=color.white)
+my_targets_list=[water,bone,lead]
+my_water_lbl=label(pos=vector(0,water.height/2-text_size,0), text='<b>WATER<b>', box = False, opacity=0, color=vec(0,0.6,0.8), visible=True)
+my_bone_lbl=label(pos=vector(0,water.height/2-text_size,0), text='<b>BONE<b>', box = False, opacity=0, color=vector(0.6,0.6,0.6), visible=False)
+my_lead_lbl=label(pos=vector(0,water.height/2-text_size,0), text='<b>LEAD<b>', box = False, opacity=0, color=vector(0.3,0.3,0.3), visible=False)
+my_prob_lbl = label(pos=vector(550, xray_label.pos.y+2*text_size,0), text="<b>NUMBER OF EVENTS<b>", color=vector(0,0.5,0.5), box=False, opacity=0)
+pe_tot_lbl = label(pos=vector(probability_list[0].x+62, my_prob_lbl.pos.y-6.5*text_size,0), color=vector(0,0.5,0.5), height = 1.5*text_size, box=False, opacity=0)
+my_TRtot_lbl = label(pos=vector(probability_list[1].x-62, my_prob_lbl.pos.y-2*text_size,0), text="<b>Transmission<b>", height=0.85*text_size, color=vector(0,0.5,0.5), box=False, opacity=0)
+tr_tot_lbl = label(pos=vector(probability_list[1].x-62, my_prob_lbl.pos.y-6.5*text_size,0), color=vector(0,0.5,0.5), height = 1.5*text_size, box=False, opacity=0)
+my_CStot_lbl = label(pos=vector((probability_list[0].x+probability_list[1].x)/2,my_prob_lbl.pos.y-2*text_size,0), text="<b>Compton<b>", height=0.85*text_size, color=vector(0,0.5,0.5), box=False, opacity=0)
+cs_tot_lbl = label(pos=vector((probability_list[0].x+probability_list[1].x)/2, my_prob_lbl.pos.y-6.5*text_size,0), color=vector(0,0.5,0.5), height = 1.5*text_size, box=False, opacity=0)
+element_names_list = [my_water_lbl,my_bone_lbl,my_lead_lbl]
+pe_schem = box(pos=vector(0,0,0), length=scene.width/2, height=scene.width/2, width=0.5, texture="https://webdev2.watzek.cloud/~nddill/scanningSims/images/projection_Radiography/PE.png", shininess=0, visible = False)
+cs_schem = box(pos=vector(0,0,0), length=scene.width/2, height=scene.width/2, width=0.5, texture="https://webdev2.watzek.cloud/~nddill/scanningSims/images/projection_Radiography/Compton.png", shininess=0, visible = False, color=color.white)
+trans_schem = box(pos=vector(0,0,0), length=scene.width/2, height=scene.width/2, width=0.5, texture="https://webdev2.watzek.cloud/~nddill/scanningSims/images/projection_Radiography/Atom.png", shininess=0, visible = False, color=color.white)
 current_element = water
 
 current_lbl=my_water_lbl
@@ -604,7 +197,7 @@ for i in range(len(pulse_list)):
     pulse_list[i].y -= scene.width*(70/1024) # changing start point on y, X-ray needs to head directly toward scattered electon in PE
     pulse_list[i].x -= scene.width*(110/1024)
     pulse_list[i].z += 2
-
+    
 #Create Title
 scaling_sphere1=sphere(pos=vector(0,-300,0), opacity=0)
 scaling_sphere2=sphere(pos=vector(0,-1*atomic_label.pos.y+7*text_size,0), opacity=0)
@@ -628,11 +221,11 @@ lbl_start=label(
     canvas=scene, 
     color=vector(0,0.36,0.39), 
     height=15, 
-    visible=False, 
+    visible=True, 
     opacity=0
     )
 
-# Hyperlinks
+# Hyperlinks 
 s = '''<font size=4> <font>'''
 l= '''<font size=4> <font>'''
 q = '''<font size=4> <font>'''
@@ -653,7 +246,7 @@ def link4(url, d):
     global v
     v += "<a href='https://medicalimaging.watzekdi.net/images/Xray_images/Activity2-Interactions/%20Information-Interactions.png" + "' target='_blank'>" + url + "</a>"
     v += d
-
+    
 link4("Information", "&nbsp &nbsp &nbsp")
 scene.append_to_title(v)
 link3("Background", "&nbsp &nbsp &nbsp")
@@ -695,7 +288,7 @@ def caption_print(text):
             message_list[i] = message_list[i+1]
         message_list[9] = text
         for i in message_list:
-            control_panel.append_to_caption(i)
+            control_panel.append_to_caption(i)   
 
 def create_photon(loc): #Fix photons not all starting at source
     new_photon=curve(
@@ -706,11 +299,11 @@ def create_photon(loc): #Fix photons not all starting at source
         origin = loc
         )
     return new_photon
-
+    
 def move_objects(objects, directions, ends, speed=3): #objects is a list (e.g., x_ray or x_ray and sphere)
     travel_vector = vector(1,0,0)
 
-    remember_view = is_atomic
+    remember_view =is_atomic
 
     number_done = 0
 
@@ -835,29 +428,29 @@ def interaction(photon, in_vector):
         if E==20:
             if rand>=1.0: # for mu=4.8 x=3 cm page 240 of text > no transmission
                 event_type_print(3)
-                return in_vector
+                return in_vector  
             elif rand>=0.89: #probPE=0.89 #from text page 217
                 event_type_print(2)
                 return (hat(vector(sqrt(2)/2 + random()*(1-sqrt(2)/2), -sqrt(2)/2 + random()*(sqrt(2)), 0)))
-            else:
+            else: 
                 event_type_print(1)
                 photon.visible = False
-                return vector(1,0,0)
+                return vector(1,0,0) 
         if E==60:# for mu=0.55 x=3 cm page 240 of text > 19% transmission
             if rand>=0.81: # for mu=4.8 x=3 cm page 240 of text > no transmission
                 event_type_print(3)
-                return in_vector
+                return in_vector  
             elif rand>=0.25: #0.81*(probPE=0.31) #from text page 217
                 event_type_print(2)
                 return (hat(vector(sqrt(2)/2 + random()*(1-sqrt(2)/2), -sqrt(2)/2 + random()*(sqrt(2)), 0)))
-            else:
+            else: 
                 event_type_print(1)
                 photon.visible = False
                 return vector(1,0,0)
         if E==100:
             if rand>=0.64: #for mu=0.34 x=3 cm from Calculated-linear-attenuation-coefficients-cm-1-for-biodegradable-implant-materials.png
                 event_type_print(3)
-                return in_vector
+                return in_vector  
             elif rand>=0.06: #0.64*0.09  probPE=0.09
                 event_type_print(2)
                 return (hat(vector(sqrt(2)/2 + random()*(1-sqrt(2)/2), -sqrt(2)/2 + random()*(sqrt(2)), 0)))
@@ -865,7 +458,7 @@ def interaction(photon, in_vector):
                 event_type_print(1)
                 photon.visible = False
                 return vector(1,0,0)
-    if Z==82:
+    if Z==82: 
         probPE=1.00 #Nearly all PE for iodine Z=49.8 (88% at 100 KeV) so lead is basicallly all PE (82/49.8)^3 > 4
         event_type_print(1)
         photon.visible = False
@@ -877,7 +470,7 @@ def randomize_compton_position(): #randomly selects a starting posistion for the
     compton_electronLoc, url, x_corr, electron_y = COMPTON_ANIMATION[animation_choice]
     compton_electron.pos = compton_electronLoc
     my_CS_atomic.texture = url
-    #my_CS_atomic.visible = True
+    my_CS_atomic.visible = True
 
 
 def resetAtomic():
@@ -935,18 +528,10 @@ def switchView():
             my_error2_lbl.visible = False
             button_box_list[0].color = vector(0.7,0.7,0.7)
 
-            #show buttons for different simulation types when atomic view starts -jc
-            
-            for i in [1,2,3]:
-                button_box_list[i].visible = True
-                button_icon_list[i].visible = True
-                button_text_list[i].visible = True
-
             if started:
                 xray.visible = False #clicking the start/stop button while the program is running stops the program -jc
 
             if is_atomic:
-                
 
                 for i in range(0,3):
                     my_target_lbl_list[i].visible = False
@@ -976,25 +561,18 @@ def switchView():
                 medium_label.visible = False
                 detector_box.visible = False
                 detector_label.visible = False
-                lbl_start2.visible = True
-                lbl_compton.visible = False
-                probability_box.visible = False
-                my_water_lbl.visible = False
-                my_bone_lbl.visible = False
-                my_lead_lbl.visible = False
-                my_prob_lbl.visible = False
-                my_PEtot_lbl.visible = False
-                my_TRtot_lbl.visible = False
-                my_CStot_lbl.visible = False
-            else: #switch back to the origanal view of the simulation -jc
+                lbl_start2.visible=True     
+                lbl_compton.visible=False
+                probability_box.visible=False
+                my_water_lbl.visible=False
+                my_bone_lbl.visible=False
+                my_lead_lbl.visible=False
+                my_prob_lbl.visible=True
+                lbl_PE.visible=True
+                my_TRtot_lbl.visible=False
+                my_CStot_lbl.visible=False
+            else:
                 caption_print("Switched to target view\n")
-
-
-                for i in [1,2,3]:
-                    button_box_list[i].visible = False
-                    button_icon_list[i].visible = False
-                    button_text_list[i].visible = False
-                
 
                 #re-enable the sliders and menu
                 E_slider.disabled = False
@@ -1037,13 +615,12 @@ def switchView():
                 atomic_label.visible = False
                 compton_electron.visible = False
                 atomic_label.visible = False
-                probability_box.visible = True
-                my_prob_lbl.visible = True
-                my_PEtot_lbl.visible = True
-                my_TRtot_lbl.visible = True
-                lbl_compton.visible = False
-                my_CStot_lbl.visible = True
-
+                probability_box.visible=True
+                my_prob_lbl.visible=True
+                lbl_PE.visible=False
+                my_TRtot_lbl.visible=True
+                lbl_compton.visible=False
+                my_CStot_lbl.visible=True
             sleep(1/(2*animation_speed))
             started = False
             running = False
@@ -1128,7 +705,7 @@ wtext(text="                 ")
 speed_slider = slider(bind=adjust_speed, min=500, max=2000, step=100, value=animation_speed, length=200, width=10)
 speed_caption = wtext(text="<font size=4> Speed<font> =<font>"+ str(animation_speed))
 
-
+    
 #-------------------------------New canvas with control panel ---------------------------------------------------------------------------------------------------------------------------------------------------
 control_panel = canvas(
     width =1024, 
@@ -1199,12 +776,6 @@ def create_buttons(chosen_canvas, text_list, icon_list): #Positioning buttons un
 #sets up images for the control pannel -jc
 create_buttons(control_panel, ['Play/Pause', 'PE', 'Compton', 'Transmitted'], ['⏯','⚛️','📈','📡'])
 
-#hides the buttons that cannot be used in the initial scene -jc
-for i in [1,2,3]:
-        button_box_list[i].visible = False
-        button_icon_list[i].visible = False
-        button_text_list[i].visible = False
-
 loc_b=vector(0,0,0)
 
 def Run():
@@ -1265,19 +836,6 @@ def Run():
                 tr_tot_lbl.visible=False
                 started_atomic = True
 
-                #create a if statment that prevents swiching animation while one is active -jc
-                if button_box_list[0].color == color.green:
-                    control_panel.bind("mousedown", Run)
-                    control_panel.unbind("mousedown", pe_but)
-                    control_panel.unbind("mousedown", cs_but)
-                    control_panel.unbind("mousedown", trans_but)
-                # else:
-                #     control_panel.bind("mousedown", Run)
-                #     control_panel.unbind("mousedown", pe_but)
-                #     control_panel.unbind("mousedown", cs_but)
-                #     control_panel.unbind("mousedown", trans_but)
-                    
-
                 #Make sure that the canvas is set up properly if this isnt the first time mechinistic view has been set up -jc
                 if has_run:   #Check
                     resetAtomic()
@@ -1324,7 +882,6 @@ def pe_but():
         PE_scatterElectron.opacity = 1
         PE_dropElectron.opacity = 1
         PE_dropElectron.visible = True
-
         my_error_lbl.visible = False
         compton_electron.visible = False
         my_PE_atomic.visible = True
@@ -1384,7 +941,7 @@ def cs_but():
         my_lead_lbl.visible=False
         my_prob_lbl.visible=False
         my_CStot_lbl.visible=False
-        my_PEtot_lbl.visible=False
+        lbl_PE.visible=False
         my_TRtot_lbl.visible=False
 
         #disable irrelevent menus -jc
@@ -1395,7 +952,7 @@ def cs_but():
         button_box_list[1].color = vector(0.7,0.7,0.7)
         button_box_list[2].color = color.green
         button_box_list[3].color = vector(0.7,0.7,0.7)
-
+        
 #control_panel.bind("mousedown", cs_but)
 control_panel.unbind("mousedown", cs_but)
 
@@ -1421,7 +978,7 @@ def trans_but(): #Make lead
         my_lead_lbl.visible=False
         my_prob_lbl.visible=False
         my_CStot_lbl.visible=False
-        my_PEtot_lbl.visible=False
+        lbl_PE.visible=False
         my_TRtot_lbl.visible=False
 
         #disable irrelevent menus -jc
@@ -1474,7 +1031,7 @@ while True:
 
         #set defaults for atomic view
         started_atomic = True
-        animation_speed = speed_slider.value
+        animation_speed=300
 
         xray = create_photon(xray_source.pos+vector(xray_source.length/2,0,0))
 
