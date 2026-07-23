@@ -26,10 +26,10 @@ gradient_active = False
 
 # scene = canvas(width=0, height=0)
 
-link = document.createElement("a")
-link.href = "https://medicalimaging.watzekdi.net/images/mri_images/Slice%20Selection/Background-Phase%26FreqEncoding_new.png"
-link.target = "_blank"
-link.innerHTML = "Background"
+link1 = document.createElement("a")
+link1.href = "https://medicalimaging.watzekdi.net/images/mri_images/Slice%20Selection/Background-Phase%26FreqEncoding_new.png"
+link1.target = "_blank"
+link1.innerHTML = "Background"
 
 document.body.prepend(link)
 
