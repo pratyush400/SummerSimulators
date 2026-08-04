@@ -3,7 +3,7 @@ Web VPython 3.2
 from vpython import *
 
 #Set up first canvas (scene). Everything will go here by default unit next canvas set up.
-scene=canvas(width =1024, height=480, center = vector(0,0,0), background=color.white, userspin=False, userzoom=False, resizable=True)
+scene = canvas(width =1024, height=480, center = vector(0,0,0), background=color.white, userspin=False, userzoom=False, resizable=True)
 scene.lights=[]
 distant_light(direction=vector( 0.22, 0.44, 0.88), color=color.white)
 distant_light(direction=vector(-0.88, -0.22, -0.44), color=color.white)
@@ -14,11 +14,11 @@ text_size = 15
 is_scanning = False
 propagating = False
 running = False
-drag=False
+drag = False
 scatter_ratio = 0.2
 scatter_positions=[]
 
-for i in range(9):
+for i in range(9): #not currently sure why we add this value 9 times -jc
 
     scatter_positions.append(vector(scene.width*((84+42*i)/1024),scene.height*(-140/480),0))
 
@@ -80,6 +80,7 @@ ray_list=[]
 ray_direction=[]
 ray_destination=[]
 w=-8
+
 for i in range(0,2*abs(w)+1,1):
 
     #create an arrow with no direction or magnitude, and associate it with the list -jc
@@ -389,7 +390,7 @@ def adjust_scatter_ratio(s):
         scatter_ratio = s.value
 
     scatter_ratio_caption.text ='<font size=4>' +  str(round(scatter_ratio*100)) + "% Scattering\n"
-    
+
 scatter_ratio_slider = slider(bind=adjust_scatter_ratio, min=0, max=1, step=0.2, value=scatter_ratio, length=250, width=15)
 scatter_ratio_caption = wtext(text='<font size=4>' + str(round(scatter_ratio*100)) + "% Scattering\n")
 
