@@ -11,7 +11,7 @@ link1.href = "https://placeholder.com"
 link1.target = "_blank"
 link1.innerHTML = "Background"
 
-document.body.prepend(link)
+document.body.prepend(link1)
 
 #----------------------------Create Scenes----------------------------#
 
@@ -25,7 +25,7 @@ animation_scene = canvas(
     userspin = False
 )
 
-animation_scene.range = 1.5
+#animation_scene.range = 1.5
 animation_scene.lights = []
 distant_light(direction = vector( 0.22, 0.44, 0.88), color = color.white)
 distant_light(direction = vector(-0.88, -0.22, -0.44), color = color.white)
@@ -211,6 +211,26 @@ class button:
 #---------------Create Functions---------------#
 
 #---------------Setup Objects------------------#
+
+emission_box = box(
+            canvas = animation_scene,
+
+            pos = vector(0,0,0),
+            length = 1,                
+            height = 1,                
+            width = 1,                 
+            color = vector(.4, .4, .4)
+        )
+    
+ctrlbox = box(
+            canvas = control_panel,
+
+            pos = vector(0,0,0),
+            length = 1,                
+            height = 1,                
+            width = 1,                 
+            color = vector(.4, .4, .4)
+        )
 
 #---------------Setup main loop----------------#
 
