@@ -4,7 +4,55 @@ from vpython import *
 
 #---------------Declare Globals----------------#
 
-#---------------Setup screens------------------#
+#----------------------------Add Hyperlinks-------------------------------#
+
+link1 = document.createElement("a")
+link1.href = "https://placeholder.com"
+link1.target = "_blank"
+link1.innerHTML = "Background"
+
+document.body.prepend(link)
+
+#----------------------------Create Scenes----------------------------#
+
+animation_scene = canvas(
+    width = 1024,
+    height = 480,
+    center = vector(0,0,0),
+    background = vector(1,1,1),
+    resizable = False,
+    userzoom = False,
+    userspin = False
+)
+
+animation_scene.range = 1.5
+animation_scene.lights = []
+distant_light(direction = vector( 0.22, 0.44, 0.88), color = color.white)
+distant_light(direction = vector(-0.88, -0.22, -0.44), color = color.white)
+
+
+control_panel = canvas(
+    width =1024,
+    height=100,
+    center = vector(0, 0, 0),
+    background = vector(0.622, 0.779, 0.847),
+    userspin = False,
+    userzoom = False,
+    resizable = False
+)   
+
+#----------------------------Create Title / Links-----------------------------#
+
+title = label(
+    canvas=animation_scene,
+    pos=vector(0, 1.3, 0),
+    text="Investigating Phase and Frequency Encoding",
+    height=25,
+    color=color.black,
+    box=False,
+    opacity=0
+)
+
 
 #---------------Create Classes-----------------#
 

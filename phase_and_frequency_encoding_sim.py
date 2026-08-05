@@ -22,10 +22,6 @@ gradient_active = False
 
 #----------------------------Add Hyperlinks-------------------------------#
 
-#create an invisable canvas, if you dont glowscript doesnt like it
-
-# scene = canvas(width=0, height=0)
-
 link1 = document.createElement("a")
 link1.href = "https://medicalimaging.watzekdi.net/images/mri_images/Slice%20Selection/Background-Phase%26FreqEncoding_new.png"
 link1.target = "_blank"
