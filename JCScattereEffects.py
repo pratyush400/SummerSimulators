@@ -45,8 +45,8 @@ control_panel = canvas(
 
 title = label(
     canvas=animation_scene,
-    pos=vector(0, 1.3, 0),
-    text="Investigating Phase and Frequency Encoding",
+    pos=vector(0, 2, 0),
+    text = "Effects of Scattering on X-Ray Imaging",
     height=25,
     color=color.black,
     box=False,
@@ -208,20 +208,86 @@ class button:
         if self.action:
             self.action(self)
 
+class X-Ray:
+
+    def __init__(self, interaction_pos):
+
+        self.body_emmited = cylinder(
+
+            canvas = animation_scene,
+            pos = vector(0, 1.5, 0),
+            axis = interaction_pos - emission_box.pos,
+            radius = .03,
+            color = color.blue,
+            visible = True
+
+        )
+
+        self.target_pos = calculate_target_pos(self)
+
+        self.body_interacted = cylinder(
+            
+            canvas = animation_scene,
+            pos = interaction_pos,
+            axis = target_pos-interaction_pos
+        )
+
+
+
+
 #---------------Create Functions---------------#
+
+def calculate_target_pos():
+    pass
 
 #---------------Setup Objects------------------#
 
 emission_box = box(
             canvas = animation_scene,
 
-            pos = vector(0,0,0),
-            length = 1,                
-            height = 1,                
-            width = 1,                 
+            pos = vector(0, 1.5, 0),
+            length = .1,                
+            height = .1,                
+            width = .1,                 
             color = vector(.4, .4, .4)
+            texture = ""
         )
     
+paitent_placeholder_line = cylinder(
+
+            canvas = animation_scene,
+
+            pos = vector(-1.5, .5, 0),
+            axis = vector(3,0,0),
+            radius = .03,
+            color = color.black,
+            visible = True
+
+        )
+
+screen_placeholder_line = cylinder(
+
+            canvas = animation_scene,
+
+            pos = vector(-1.5, -.5, 0),
+            axis = vector(3,0,0),
+            radius = .03,
+            color = color.black,
+            visible = True
+
+        )
+
+paitent_picture_placeholder = box(
+            canvas = animation_scene,
+
+            pos = vector(0,0,0),
+            length = .1,                
+            height = .1,                
+            width = .1,                 
+            color = vector(.4, .4, .4)
+        )
+
+
 ctrlbox = box(
             canvas = control_panel,
 
