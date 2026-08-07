@@ -1,8 +1,11 @@
 Web VPython 3.2
 
 from vpython import *
+from random import *
 
 #---------------Declare Globals----------------#
+
+X_Ray_list = []
 
 #----------------------------Add Hyperlinks-------------------------------#
 
@@ -208,9 +211,12 @@ class button:
         if self.action:
             self.action(self)
 
-class X-Ray:
+class X_Ray:
+
 
     def __init__(self, interaction_pos):
+
+        #set up path from emitter to paitent
 
         self.body_emmited = cylinder(
 
@@ -223,22 +229,39 @@ class X-Ray:
 
         )
 
-        self.target_pos = calculate_target_pos(self)
-
+        #set up object/attribute to store ray fron paitent to photo.
         self.body_interacted = cylinder(
             
             canvas = animation_scene,
             pos = interaction_pos,
-            axis = target_pos-interaction_pos
+            axis = vector(0,0,0)
+            radius = .03,
+            color = color.blue,
+            visible = True
+
         )
+
+        X_Ray_list.append(self)
+
+    
+    def interaction(self):
+        pass
+        #create a die roll to determine if ray should diflect.
+
+        # if diflection: Set self.body_interacted.axis + vector(?,?,?)
+        if True: 
+            self.body_interacted.axis = self.body_emmited.axis
 
 
 
 
 #---------------Create Functions---------------#
 
-def calculate_target_pos():
-    pass
+def clear_rays():
+    global X_Ray_list
+
+    X_Ray_list = []
+
 
 #---------------Setup Objects------------------#
 
