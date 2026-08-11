@@ -1,7 +1,7 @@
 Web VPython 3.2
 
 from vpython import *
-from random import *
+import random
 
 #---------------Declare Globals----------------#
 
@@ -226,7 +226,7 @@ class X_Ray:
             axis = interaction_pos - emission_box.pos,
             radius = .03,
             color = color.blue,
-            visible = False
+            visible = True
 
         )
 
@@ -238,7 +238,7 @@ class X_Ray:
             axis = vector(0,0,0),
             radius = .03,
             color = color.blue,
-            visible = False
+            visible = True
 
         )
 
@@ -263,19 +263,45 @@ class X_Ray:
             direction_coinflip = random.randint(0,1)
 
             if direction_coinflip == 0:
-                self.body_interacted.axis = self.body_emmited.axis + vector(self.body_interacted.axis.mag,0,0)
+                self.body_interacted.axis = self.body_emmited.axis + vector(self.body_interacted.axis.mag, 0, 0)
+
             if direction_coinflip == 1:
-            self.body_interacted.axis = self.body_emmited.axis - vector(self.body_interacted.axis.mag,0,0)
+                self.body_interacted.axis = self.body_emmited.axis - vector(self.body_interacted.axis.mag, 0, 0)
 
 
 
 
 #---------------Create Functions---------------#
 
-def clear_rays():
+def take_picture():
     global X_Ray_list
 
+    #make arrows invisible and remove them from the list as a reset
+
+    for ray in X_Ray_list:
+        ray.body_emmited.visible = False
+        ray.body_interacted.visible = False
+
     X_Ray_list = []
+    print(len(X_Ray_list))
+
+
+    if picture_button.on == True:
+        i = 0
+
+        while i <= 10:
+            X_Ray(vector(-1 + (.2*i), .5, 0))
+            i += 1
+
+        for ray in X_Ray_list:
+            ray.interaction()
+
+    if picture_button.off == True:
+
+        for ray in X_Ray_list:
+            ray.body_emmited.visible = False
+            ray.body_interacted.visible = False
+
 
 
 #---------------Click Functionality------------#
@@ -284,7 +310,7 @@ def click_event_anim(event):
 
     pass
 
-animation_scene.bindreturn('mousedown', click_event_anim)
+animation_scene.bind('mousedown', click_event_anim)
 
 def click_event_ctrl(event):
 
@@ -317,7 +343,7 @@ emission_box = box(
             length = .1,                
             height = .1,                
             width = .1,                 
-            color = vector(.4, .4, .4)
+            color = vector(.4, .4, .4),
             texture = ""
         )
     
@@ -356,15 +382,14 @@ paitent_picture_placeholder = box(
         )
 
 
-ctrlbox = box(
-            canvas = control_panel,
+picture_button = button(control_panel, vector(-3,0,0), "Take_X-Ray", "📷", take_picture)
 
-            pos = vector(0,0,0),
-            length = 1,                
-            height = 1,                
-            width = 1,                 
-            color = vector(.4, .4, .4)
-        )
+def clear():
+    global X_Ray_list
+
+    X_Ray_list = []
+
+clear = button(control_panel, vector(-2,0,0), "Take_X-Ray", "📷", take_picture)
 
 #---------------Setup main loop----------------#
 

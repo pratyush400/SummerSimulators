@@ -532,7 +532,7 @@ def take_picture(button):
     #create the arrows for visual representation
     if button.on == True:
 
-        reset_arrow_memoryow_memory()
+        reset_arrow_memory()
 
         for m in pointer_list:
             arrow_list.append(
@@ -573,7 +573,7 @@ def reset_button_clicked_sliders(button):
 
     gradient_active = False
 
-def reset_arrow_memoryow_memory():
+def reset_arrow_memory():
     
     global arrow_list
 
