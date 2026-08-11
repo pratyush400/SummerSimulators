@@ -5,6 +5,7 @@ from random import *
 
 #---------------Declare Globals----------------#
 
+button_list = []
 X_Ray_list = []
 
 #----------------------------Add Hyperlinks-------------------------------#
@@ -225,7 +226,7 @@ class X_Ray:
             axis = interaction_pos - emission_box.pos,
             radius = .03,
             color = color.blue,
-            visible = True
+            visible = False
 
         )
 
@@ -234,10 +235,10 @@ class X_Ray:
             
             canvas = animation_scene,
             pos = interaction_pos,
-            axis = vector(0,0,0)
+            axis = vector(0,0,0),
             radius = .03,
             color = color.blue,
-            visible = True
+            visible = False
 
         )
 
@@ -246,11 +247,25 @@ class X_Ray:
     
     def interaction(self):
         pass
+
+        scatter_roll = random.randint(1,10)
         #create a die roll to determine if ray should diflect.
 
-        # if diflection: Set self.body_interacted.axis + vector(?,?,?)
-        if True: 
+        #If the particle is not difelcted keep the path straight
+
+        if scatter_roll <= 3:
             self.body_interacted.axis = self.body_emmited.axis
+
+        #If the particles is diflected diflect in one of two directions
+        if scatter_roll > 3:
+
+            #direction coinflip
+            direction_coinflip = random.randint(0,1)
+
+            if direction_coinflip == 0:
+                self.body_interacted.axis = self.body_emmited.axis + vector(self.body_interacted.axis.mag,0,0)
+            if direction_coinflip == 1:
+            self.body_interacted.axis = self.body_emmited.axis - vector(self.body_interacted.axis.mag,0,0)
 
 
 
@@ -261,6 +276,36 @@ def clear_rays():
     global X_Ray_list
 
     X_Ray_list = []
+
+
+#---------------Click Functionality------------#
+
+def click_event_anim(event):
+
+    pass
+
+animation_scene.bindreturn('mousedown', click_event_anim)
+
+def click_event_ctrl(event):
+
+    click_pos = event.pos
+
+    #check to see if the click activates any buttons
+    for b in button_list:
+
+        if b.is_clicked(click_pos):
+
+            b.clicked()
+
+            return
+
+control_panel.bind('mousedown', click_event_ctrl)
+
+def unclick(event):
+    pass
+
+control_panel.bind('mouseup', unclick)
+animation_scene.bind('mouseup', unclick)
 
 
 #---------------Setup Objects------------------#
